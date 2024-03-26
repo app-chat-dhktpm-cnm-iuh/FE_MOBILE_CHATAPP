@@ -1,14 +1,14 @@
 import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/pages/home.dart';
-import 'package:fe_mobile_chat_app/pages/register_phone_number.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 
-class RegAccountName extends StatelessWidget {
-  const RegAccountName({super.key});
+class RegPhoneNumber extends StatelessWidget {
+  const RegPhoneNumber({super.key});
 
   @override
   Widget build(BuildContext context) {
+    bool checkedValue = false;
     final  size = MediaQuery.of(context).size;
     final paddingSize = MediaQuery.of(context).padding;
 
@@ -28,7 +28,7 @@ class RegAccountName extends StatelessWidget {
             children: [
               Padding(
                 padding: EdgeInsets.all(paddingSize.vertical*1.5),
-                child: Text("Tên tài khoản",
+                child: Text("Tạo tài khoản",
                   style: TextStyle(
                       fontSize: size.height*0.04,
                       fontWeight: FontWeight.bold,
@@ -40,6 +40,7 @@ class RegAccountName extends StatelessWidget {
                 child: SizedBox(
                   width: size.width * 0.8,
                   child: TextField(
+                    keyboardType: TextInputType.phone,
                     style: TextStyle(
                         color: darkGreen,
                         fontSize: size.height*0.03,
@@ -51,64 +52,35 @@ class RegAccountName extends StatelessWidget {
                             borderSide: BorderSide(
                                 color: darkGreen)
                         ),
-                        hintText: "Nhập tên tài khoản"
+                        hintText: "Nhập số điện thoại"
                     ),
                   ),
                 ),
               ),
               SizedBox(
-                width: size.width * 0.8,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(bottom: paddingSize.vertical*0.3),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: SizedBox(
-                          child: Text("Lưu ý",
-                              style: TextStyle(
-                                  fontSize: size.height*0.024,
-                                  fontWeight: FontWeight.bold)
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(bottom: paddingSize.vertical*0.2),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: SizedBox(
-                          child: Text("Tên tài khoản phải từ 2 - 40 kí tự",
-                              style: TextStyle(
-                                  fontSize: size.height*0.024,
-                                  fontWeight: FontWeight.normal)
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(bottom: paddingSize.vertical*0.5),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: SizedBox(
-                          child: Text("Tên tài khoản nên là tên thật để bạn bè dễ dàng tìm kiếm bạn.",
-                              style: TextStyle(
-                                  fontSize: size.height*0.024,
-                                  fontWeight: FontWeight.normal)
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                width: size.width,
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: paddingSize.vertical*0.3),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Checkbox(
+                        side: const BorderSide(color: greyDark),
+                        activeColor: darkGreen,
+                        onChanged: (value) {},
+                        value: checkedValue, ),
+                      Text("Tôi đồng ý với các điều khoản sử dụng",
+                          style: TextStyle(
+                              fontSize: size.height*0.024,
+                              fontWeight: FontWeight.normal)
+                      )
+                    ],
+                  ),
                 ),
               ),
 
               ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(context, PageTransition(
-                        child: const RegPhoneNumber(),
-                        type: PageTransitionType.rightToLeft));
-                  },
+                  onPressed: () {},
                   style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(darkGreen),
                       fixedSize: MaterialStateProperty.all(
