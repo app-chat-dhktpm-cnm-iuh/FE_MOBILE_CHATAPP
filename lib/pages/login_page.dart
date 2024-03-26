@@ -17,19 +17,19 @@ class Login extends StatelessWidget {
         automaticallyImplyLeading: false,
         leading: IconButton(
           onPressed: () {
-            Navigator.pop(context, PageTransition(child: HomePage(), type: PageTransitionType.leftToRight));
+            Navigator.pop(context, PageTransition(child: const HomePage(), type: PageTransitionType.leftToRight));
           },
           color: darkGreen,
-          icon: Icon(Icons.arrow_back),),
+          icon: const Icon(Icons.arrow_back),),
       ),
       body: Center(
         child: Column(
           children: [
             Padding(
               padding: EdgeInsets.all(paddingSize.vertical*1.5),
-              child: const Text("Đăng nhập",
+              child: Text("Đăng nhập",
                 style: TextStyle(
-                    fontSize: 30,
+                    fontSize: size.height*0.04,
                     fontWeight: FontWeight.bold,
                     color: lightGreen),
                       ),
@@ -38,11 +38,14 @@ class Login extends StatelessWidget {
               padding: EdgeInsets.only(bottom: paddingSize.vertical*0.2),
               child: SizedBox(
                 width: size.width * 0.8,
-                child: const TextField(
+                child: TextField(
                   keyboardType: TextInputType.phone,
                   textInputAction: TextInputAction.next,
-                  style: TextStyle(color: darkGreen),
-                  decoration: InputDecoration(
+                  style: TextStyle(
+                      color: darkGreen,
+                      fontSize: size.height*0.03,
+                      fontWeight: FontWeight.w400),
+                  decoration: const InputDecoration(
                       isDense: true,
                       contentPadding: EdgeInsets.only(bottom: 5),
                       focusedBorder: UnderlineInputBorder(
@@ -60,10 +63,14 @@ class Login extends StatelessWidget {
                 width: size.width * 0.8,
                 child: Padding(
                   padding: EdgeInsets.only(top: paddingSize.top),
-                  child: const TextField(
-                      style: TextStyle(color: darkGreen),
+                  child: TextField(
+                      style: TextStyle(
+                          color: darkGreen,
+                          fontSize: size.height*0.03,
+                          fontWeight: FontWeight.w400
+                      ),
                       obscureText: true,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                           isDense: true,
                           contentPadding: EdgeInsets.only(bottom: 5),
                           focusedBorder: UnderlineInputBorder(
@@ -83,9 +90,9 @@ class Login extends StatelessWidget {
                 child: SizedBox(
                   width: size.width * 0.4,
                   child: InkWell(
-                    child: const Text("Quên mật khẩu ?",
+                    child: Text("Quên mật khẩu ?",
                       style: TextStyle(
-                          fontSize: 16,
+                          fontSize: size.height*0.024,
                           fontWeight: FontWeight.bold,
                           color: lightGreen)
                     ),
@@ -104,7 +111,9 @@ class Login extends StatelessWidget {
                             size.height * 0.065
                         )
                     )),
-                child: const Text("Đăng nhập", style: TextStyle(color: Colors.white))
+                child: Text("Đăng nhập", style: TextStyle(
+                    color: Colors.white,
+                    fontSize: size.height*0.03))
             )
           ],
         ),
