@@ -1,5 +1,6 @@
 import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/pages/home.dart';
+import 'package:fe_mobile_chat_app/pages/login_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -13,8 +14,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primaryColor: backgroundColor),
-      home: const HomePage()
+      theme: ThemeData(
+          scaffoldBackgroundColor: backgroundColor
+      ),
+      home: const HomePage(),
     );
   }
 }

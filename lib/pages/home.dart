@@ -1,6 +1,8 @@
 import 'package:fe_mobile_chat_app/constants.dart';
+import 'package:fe_mobile_chat_app/pages/login_page.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -24,7 +26,9 @@ class HomePage extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                   children:[
                     ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(context, PageTransition(child: Login(), type: PageTransitionType.rightToLeft));
+                        },
                         style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all(darkGreen),
                             fixedSize: MaterialStateProperty.all(
