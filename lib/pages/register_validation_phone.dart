@@ -1,5 +1,6 @@
 import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/pages/home.dart';
+import 'package:fe_mobile_chat_app/pages/register_create_password.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -184,7 +185,11 @@ class _RegValidatePhoneNumberState extends State<RegValidatePhoneNumber> {
               Padding(
                 padding: EdgeInsets.only(top: paddingSize.vertical),
                 child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(context, PageTransition(
+                          child: const RegCreatePassword(),
+                          type: PageTransitionType.rightToLeft));
+                    },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(darkGreen),
                         fixedSize: MaterialStateProperty.all(
