@@ -1,5 +1,6 @@
 import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/pages/home.dart';
+import 'package:fe_mobile_chat_app/pages/register_validation_phone.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -80,7 +81,9 @@ class RegPhoneNumber extends StatelessWidget {
               ),
 
               ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(context, PageTransition(child: const RegValidatePhoneNumber(), type: PageTransitionType.rightToLeft));
+                  },
                   style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(darkGreen),
                       fixedSize: MaterialStateProperty.all(
