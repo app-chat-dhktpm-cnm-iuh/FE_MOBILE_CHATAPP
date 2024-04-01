@@ -1,6 +1,6 @@
 import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/pages/login_page.dart';
-import 'package:fe_mobile_chat_app/pages/register_account_name_page.dart';
+import 'package:fe_mobile_chat_app/pages/register_account_name.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
