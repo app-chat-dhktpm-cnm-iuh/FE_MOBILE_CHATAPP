@@ -1,8 +1,11 @@
+import 'dart:core';
 import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/pages/home.dart';
 import 'package:fe_mobile_chat_app/pages/register_phone_number.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
+
+import '../model/User.dart';
 
 class RegAccountName extends StatefulWidget {
   const RegAccountName({super.key});
@@ -14,21 +17,22 @@ class RegAccountName extends StatefulWidget {
 class _RegAccountName extends State<RegAccountName> {
   final _controller = TextEditingController();
   var _errorName;
+  var user = User();
 
-  String?  validateUserName(String value) {
+  void validateUserName(String value) {
     RegExp regexNumber = RegExp(r"[0-9_]");
     RegExp regexSpecialCharacter = RegExp(r'[!@#$%^&*(),.?":{}|<>_=+-;]');
     RegExp regexValidName = RegExp(r'[A-za-z ]{2,40}');
     _errorName = null;
 
     if(regexNumber.hasMatch(value)) {
-      return _errorName = "Tên không được chứa số" ;
+       _errorName = "Tên không được chứa số" ;
     } else if (regexSpecialCharacter.hasMatch(value)) {
-      return _errorName =  "Tên không được chứa kí tự đặc biệt";
+       _errorName =  "Tên không được chứa kí tự đặc biệt";
     } else if(value == '') {
-      return _errorName = null;
+       _errorName = null;
     } else if (!regexValidName.hasMatch(value)) {
-      return _errorName = "Tên không hợp lệ. Xin hãy đọc kỹ lưu ý";
+       _errorName = "Tên không hợp lệ. Xin hãy đọc kỹ lưu ý";
     }
   }
 
@@ -151,11 +155,15 @@ class _RegAccountName extends State<RegAccountName> {
                     if( _controller.text.isEmpty) {
                       _errorName = "Chưa nhập tên";
                     } else if(_errorName == null) {
+                      user = user.copyWith(name:  _controller.text);
                       Navigator.push(
                           context,
                           PageTransition(
                               child: const RegPhoneNumber(),
-                              type: PageTransitionType.rightToLeft));
+                              type: PageTransitionType.rightToLeft,
+                              settings: RouteSettings(arguments: user)
+                          )
+                      );
                     }
                   });},
                   style: ButtonStyle(

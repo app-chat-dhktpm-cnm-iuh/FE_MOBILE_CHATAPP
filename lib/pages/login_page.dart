@@ -1,123 +1,169 @@
+import 'dart:io';
+
 import 'package:fe_mobile_chat_app/constants.dart';
+import 'package:fe_mobile_chat_app/model/User.dart';
 import 'package:fe_mobile_chat_app/pages/home.dart';
+import 'package:fe_mobile_chat_app/pages/main_chat.dart';
+import 'package:fe_mobile_chat_app/services/user_service.dart';
 import 'package:flutter/material.dart';
+import 'package:http/src/response.dart';
 import 'package:page_transition/page_transition.dart';
 
-class Login extends StatelessWidget {
+class Login extends StatefulWidget {
   const Login({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final  size = MediaQuery.of(context).size;
-    final paddingSize = MediaQuery.of(context).padding;
+  State<Login> createState() => _LoginState();
+}
 
+class _LoginState extends State<Login> {
+  final _controllerPhone = TextEditingController();
+  final _controllerPass = TextEditingController();
+  var _error = "";
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final paddingSize = MediaQuery.of(context).padding;
+    String reponse = "";
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: backgroundColor,
-        automaticallyImplyLeading: false,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context, PageTransition(child: const HomePage(), type: PageTransitionType.leftToRight));
-          },
-          color: darkGreen,
-          icon: const Icon(Icons.arrow_back),),
-      ),
-      body: Center(
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.all(paddingSize.vertical*1.5),
-              child: Text("Đăng nhập",
-                style: TextStyle(
-                    fontSize: size.height*0.04,
-                    fontWeight: FontWeight.bold,
-                    color: lightGreen),
-                      ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(bottom: paddingSize.vertical*0.2),
-              child: SizedBox(
-                width: size.width * 0.8,
-                child: TextField(
-                  keyboardType: TextInputType.phone,
-                  textInputAction: TextInputAction.next,
+        appBar: AppBar(
+          backgroundColor: backgroundColor,
+          automaticallyImplyLeading: false,
+          leading: IconButton(
+            onPressed: () {
+              Navigator.pop(
+                  context,
+                  PageTransition(
+                      child: const HomePage(),
+                      type: PageTransitionType.leftToRight));
+            },
+            color: darkGreen,
+            icon: const Icon(Icons.arrow_back),
+          ),
+        ),
+        body: Center(
+          child: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.all(paddingSize.vertical),
+                child: Text(
+                  "Đăng nhập",
                   style: TextStyle(
-                      color: darkGreen,
-                      fontSize: size.height*0.03,
-                      fontWeight: FontWeight.w400),
-                  decoration: const InputDecoration(
-                      isDense: true,
-                      contentPadding: EdgeInsets.only(bottom: 5),
-                      focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(
-                          color: darkGreen)
-                      ),
-                      hintText: "Số điện thoại"
+                      fontSize: size.height * 0.04,
+                      fontWeight: FontWeight.bold,
+                      color: lightGreen),
+                ),
+              ),
+              Text(
+                _error,
+                style:
+                    TextStyle(fontSize: size.height * 0.02, color: Colors.red),
+              ),
+              Padding(
+                padding: EdgeInsets.only(bottom: paddingSize.vertical * 0.2),
+                child: SizedBox(
+                  width: size.width * 0.8,
+                  child: TextField(
+                    controller: _controllerPhone,
+                    keyboardType: TextInputType.phone,
+                    textInputAction: TextInputAction.next,
+                    style: TextStyle(
+                        color: darkGreen,
+                        fontSize: size.height * 0.03,
+                        fontWeight: FontWeight.w400),
+                    decoration: const InputDecoration(
+                        isDense: true,
+                        contentPadding: EdgeInsets.only(bottom: 5),
+                        focusedBorder: UnderlineInputBorder(
+                            borderSide: BorderSide(color: darkGreen)),
+                        hintText: "Số điện thoại"),
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(bottom: paddingSize.vertical*0.5),
-              child: SizedBox(
-                width: size.width * 0.8,
-                child: Padding(
-                  padding: EdgeInsets.only(top: paddingSize.top),
-                  child: TextField(
+              Padding(
+                padding: EdgeInsets.only(bottom: paddingSize.vertical * 0.5),
+                child: SizedBox(
+                  width: size.width * 0.8,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: paddingSize.top),
+                    child: TextField(
+                      controller: _controllerPass,
                       style: TextStyle(
                           color: darkGreen,
-                          fontSize: size.height*0.03,
-                          fontWeight: FontWeight.w400
-                      ),
+                          fontSize: size.height * 0.03,
+                          fontWeight: FontWeight.w400),
                       obscureText: true,
                       decoration: const InputDecoration(
                           isDense: true,
                           contentPadding: EdgeInsets.only(bottom: 5),
                           focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(
-                              color: darkGreen)
-                          ),
-                          hintText: "Mật khẩu"
+                              borderSide: BorderSide(color: darkGreen)),
+                          hintText: "Mật khẩu"),
                     ),
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(bottom: paddingSize.vertical*0.7),
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: SizedBox(
-                  width: size.width * 0.4,
-                  child: InkWell(
-                    child: Text("Quên mật khẩu ?",
+              Padding(
+                padding: EdgeInsets.only(bottom: paddingSize.vertical * 0.7),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: SizedBox(
+                    width: size.width * 0.4,
+                    child: InkWell(
+                      child: Text("Quên mật khẩu ?",
+                          style: TextStyle(
+                              fontSize: size.height * 0.024,
+                              fontWeight: FontWeight.bold,
+                              color: lightGreen)),
+                      onTap: () {},
+                    ),
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    User user = User();
+                    user = user.copyWith(
+                        phone: _controllerPhone.text,
+                        password: _controllerPass.text);
+                    UserServices.login(user).then((value) => {
+                          print(_controllerPass.text),
+                          print(value.body.toString()),
+                          reponse = value.body.toString(),
+                          if (reponse == "true")
+                            {
+                              Navigator.push(
+                                  context,
+                                  PageTransition(
+                                    child: const MainChat(),
+                                    type: PageTransitionType.rightToLeft,
+                                  ))
+                            }
+                          else
+                            {
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(const SnackBar(
+                                content: Text(
+                                  "Đăng nhập không thành công",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                backgroundColor: Colors.red,
+                              ))
+                            }
+                        });
+
+                    // if(reponse.body)
+                  },
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all(darkGreen),
+                      fixedSize: MaterialStateProperty.all(
+                          Size(size.width * 0.7, size.height * 0.065))),
+                  child: Text("Đăng nhập",
                       style: TextStyle(
-                          fontSize: size.height*0.024,
-                          fontWeight: FontWeight.bold,
-                          color: lightGreen)
-                    ),
-                    onTap: () {},
-                  ),
-                ),
-              ),
-            ),
-            ElevatedButton(
-                onPressed: () {},
-                style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(darkGreen),
-                    fixedSize: MaterialStateProperty.all(
-                        Size(
-                            size.width * 0.7,
-                            size.height * 0.065
-                        )
-                    )),
-                child: Text("Đăng nhập", style: TextStyle(
-                    color: Colors.white,
-                    fontSize: size.height*0.03))
-            )
-          ],
-        ),
-      )
-    );
+                          color: Colors.white, fontSize: size.height * 0.03)))
+            ],
+          ),
+        ));
   }
 }

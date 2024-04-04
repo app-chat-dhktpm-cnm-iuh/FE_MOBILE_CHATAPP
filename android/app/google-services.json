@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1019012961658",
+    "project_id": "smilechatapp-cnm",
+    "storage_bucket": "smilechatapp-cnm.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1019012961658:android:cf2954ffff2443a4b172c3",
+        "android_client_info": {
+          "package_name": "com.example.fe_mobile_chat_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWMsN8l6HUIqWxXWxDBn0eMoUw3OPhvGs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

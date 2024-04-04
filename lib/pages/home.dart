@@ -38,7 +38,7 @@ class HomePage extends StatelessWidget {
                                     size.height * 0.065
                                 )
                             )),
-                        child: const Text("Đăng nhập", style: TextStyle(color: Colors.white))),
+                        child: Text("Đăng nhập", style: TextStyle(color: Colors.white, fontSize: size.height * 0.02))),
                     Padding(
                       padding:  EdgeInsets.only(top: paddingSize.top*0.3),
                       child: ElevatedButton(
@@ -53,7 +53,7 @@ class HomePage extends StatelessWidget {
                                       size.height * 0.065
                                   )
                               )),
-                          child: const Text("Đăng ký", style: TextStyle(color: Colors.white))),
+                          child: Text("Đăng ký", style: TextStyle(color: Colors.white, fontSize: size.height * 0.02))),
                     )]
               ),
             ),
