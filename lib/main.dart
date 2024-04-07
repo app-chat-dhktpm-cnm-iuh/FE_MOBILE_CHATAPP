@@ -2,6 +2,7 @@ import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/firebase_options.dart';
 import 'package:fe_mobile_chat_app/pages/home.dart';
 import 'package:fe_mobile_chat_app/pages/login_page.dart';
+import 'package:fe_mobile_chat_app/pages/main_chat.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           scaffoldBackgroundColor: backgroundColor
       ),
-      home: const HomePage(),
+      home: const MainChat(),
     );
   }
 }

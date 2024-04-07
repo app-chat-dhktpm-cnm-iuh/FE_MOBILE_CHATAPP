@@ -6,7 +6,6 @@ import '../model/User.dart';
 import 'package:http/http.dart' as http;
 class UserServices {
 
-
   static Future<http.Response> checkExistedPhone(String phone) async {
     final uri = Uri.parse("$baseUserUrl/$phone");
     http.Response reponse = await http.get(uri);
