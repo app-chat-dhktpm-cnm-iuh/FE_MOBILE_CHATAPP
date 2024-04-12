@@ -3,13 +3,15 @@ import 'package:fe_mobile_chat_app/controllers/otp_service.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
 import 'package:fe_mobile_chat_app/pages/home.dart';
 import 'package:fe_mobile_chat_app/pages/register_create_password.dart';
+import 'package:fe_mobile_chat_app/services/stomp_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:page_transition/page_transition.dart';
 
 class RegValidatePhoneNumber extends StatefulWidget {
-  const RegValidatePhoneNumber({super.key});
+  StompManager stompManager;
+  RegValidatePhoneNumber({super.key, required this.stompManager});
 
   @override
   State<RegValidatePhoneNumber> createState() => _RegValidatePhoneNumberState();
@@ -45,7 +47,7 @@ class _RegValidatePhoneNumberState extends State<RegValidatePhoneNumber> {
               Navigator.pop(
                   context,
                   PageTransition(
-                      child: const HomePage(),
+                      child: HomePage(stompManager: widget.stompManager,),
                       type: PageTransitionType.leftToRight));
             },
             color: darkGreen,
@@ -282,7 +284,7 @@ class _RegValidatePhoneNumberState extends State<RegValidatePhoneNumber> {
                                   Navigator.push(
                                       context,
                                       PageTransition(
-                                          child: const RegCreatePassword(),
+                                          child: RegCreatePassword(stompManager: widget.stompManager,),
                                           type: PageTransitionType.rightToLeft,
                                           settings: RouteSettings(arguments: user)
                                       ))

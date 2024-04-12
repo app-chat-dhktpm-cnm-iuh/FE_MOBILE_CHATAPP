@@ -2,6 +2,7 @@
     <application
         android:label="fe_mobile_chat_app"
         android:name="${applicationName}"
+        android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

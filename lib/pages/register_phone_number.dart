@@ -3,6 +3,7 @@ import 'package:fe_mobile_chat_app/controllers/otp_service.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
 import 'package:fe_mobile_chat_app/pages/home.dart';
 import 'package:fe_mobile_chat_app/pages/register_validation_phone.dart';
+import 'package:fe_mobile_chat_app/services/stomp_manager.dart';
 import 'package:fe_mobile_chat_app/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
@@ -10,7 +11,8 @@ import 'package:page_transition/page_transition.dart';
 import 'package:http/http.dart' as http;
 
 class RegPhoneNumber extends StatefulWidget {
-  const RegPhoneNumber({super.key});
+  StompManager stompManager;
+  RegPhoneNumber({super.key, required this.stompManager});
 
   @override
   State<RegPhoneNumber> createState() => _RegPhoneNumberState();
@@ -57,7 +59,7 @@ class _RegPhoneNumberState extends State<RegPhoneNumber> {
               Navigator.pop(
                   context,
                   PageTransition(
-                      child: const HomePage(),
+                      child: HomePage(stompManager: widget.stompManager,),
                       type: PageTransitionType.leftToRight));
             },
             color: darkGreen,
@@ -184,7 +186,7 @@ class _RegPhoneNumberState extends State<RegPhoneNumber> {
                               Navigator.push(
                                   context,
                                   PageTransition(
-                                      child: const RegValidatePhoneNumber(),
+                                      child: RegValidatePhoneNumber(stompManager: widget.stompManager,),
                                       type: PageTransitionType.rightToLeft,
                                       settings:
                                           RouteSettings(arguments: user)));

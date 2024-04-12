@@ -1,13 +1,21 @@
+import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
 
 import 'package:fe_mobile_chat_app/constants.dart';
+import 'package:fe_mobile_chat_app/model/UserToken.dart';
+import 'package:fe_mobile_chat_app/services/stomp_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import 'package:stomp_dart_client/stomp.dart';
+import 'package:stomp_dart_client/stomp_config.dart';
+import 'package:stomp_dart_client/stomp_frame.dart';
 
 class MainChat extends StatefulWidget {
-  const MainChat({super.key});
+  final StompManager stompManager;
+  const MainChat({super.key, required this.stompManager});
 
   @override
   State<MainChat> createState() => _MainChatState();
@@ -67,8 +75,71 @@ class _MainChatState extends State<MainChat> {
     });
   }
 
+  // void onConnect(StompFrame frame) {
+  //   print("connected!!");
+  //   try{
+  //     stompClient.subscribe(
+  //       destination: '/topic/public',
+  //       callback: (frame) {
+  //         // final message = jsonDecode(frame.body!) ;
+  //         // final parseMessage = jsonDecode(message!);
+  //         printResult(frame.body);
+  //         // print( "/user/public/ subcribe value: ${message}");
+  //       },
+  //     );
+  //   } catch(e) {
+  //     print("Error: $e");
+  //   }
+  //
+  // }
+
+  void printResult(dynamic data) {
+    print("subscribed");
+    final message = jsonDecode(data!);
+    print(message);
+    // final parseMessage = jsonDecode(message!);
+  }
+
+
+  @override
+  void initState() {
+    super.initState();
+    widget.stompManager.subscribeToDestination("/topic/public").listen((frame) {
+
+      print("Subscribe value: ${frame.body}");
+    });
+  } // @override
+  // void initState() {
+  //   super.initState();
+  //   // final stompProvider = Provider.of<StompProvider>(context);
+  //   // stompProvider.connect();
+  //   stompProvider.stompClient?.subscribe(destination: "/topic/public", callback: (frame) {
+  //     print("value subscribe: ${frame.body}");
+  //   },);
+  //   // stompClient = StompClient(
+  //   //     config: StompConfig(
+  //   //       url: socketUrl,
+  //   //       onConnect: onConnect,
+  //   //       onWebSocketError: (dynamic error) {
+  //   //         print(error.toString());
+  //   //       },
+  //   //     ));
+  //   // stompClient.activate();
+  // }
+  //
+  // @override
+  // void dispose() {
+  //   // stompClient.deactivate();
+  //   final stompProvider = Provider.of<StompProvider>(context);
+  //   stompProvider.disconnect();
+  //   super.dispose();
+  // }
+
   @override
   Widget build(BuildContext context) {
+    var user = ModalRoute.of(context)?.settings.arguments as UserToken;
+    // final stompProvider = Provider.of<StompProvider>(context);
+    print(user.toJson());
     var size = MediaQuery.of(context).size;
     var padding = MediaQuery.of(context).padding;
     _tabBodies ??= ChatsListWidget();
@@ -80,7 +151,16 @@ class _MainChatState extends State<MainChat> {
         title: SvgPicture.asset("assets/images/Smilechat-logo.svg"),
         actions: [
           IconButton(
-              onPressed: () {},
+              onPressed: () {
+                // stompClient.send(
+                //   destination: '/app/user.userOnline',
+                //   body: JsonEncoder().convert(user.user?.toJson()),
+                // );
+                // stompProvider.stompClient?.send(
+                //   destination: '/app/user.userOnline',
+                //   body: JsonEncoder().convert(user.user?.toJson()),
+                // );
+              },
               icon: Icon(
                 Icons.add,
                 color: darkGreen,

@@ -2,13 +2,15 @@ import 'dart:core';
 import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/pages/home.dart';
 import 'package:fe_mobile_chat_app/pages/register_phone_number.dart';
+import 'package:fe_mobile_chat_app/services/stomp_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 
 import '../model/User.dart';
 
 class RegAccountName extends StatefulWidget {
-  const RegAccountName({super.key});
+  StompManager stompManager;
+  RegAccountName({super.key, required this.stompManager});
 
   @override
   State<RegAccountName> createState() => _RegAccountName();
@@ -56,7 +58,7 @@ class _RegAccountName extends State<RegAccountName> {
               Navigator.pop(
                   context,
                   PageTransition(
-                      child: const HomePage(),
+                      child: HomePage(stompManager: widget.stompManager,),
                       type: PageTransitionType.leftToRight));
             },
             color: darkGreen,
@@ -159,7 +161,7 @@ class _RegAccountName extends State<RegAccountName> {
                       Navigator.push(
                           context,
                           PageTransition(
-                              child: const RegPhoneNumber(),
+                              child: RegPhoneNumber(stompManager: widget.stompManager,),
                               type: PageTransitionType.rightToLeft,
                               settings: RouteSettings(arguments: user)
                           )

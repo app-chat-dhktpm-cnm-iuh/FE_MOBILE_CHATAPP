@@ -1,11 +1,13 @@
 import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/pages/login_page.dart';
 import 'package:fe_mobile_chat_app/pages/register_account_name.dart';
+import 'package:fe_mobile_chat_app/services/stomp_manager.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  StompManager stompManager;
+  HomePage({super.key, required this.stompManager});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +30,7 @@ class HomePage extends StatelessWidget {
                   children:[
                     ElevatedButton(
                         onPressed: () {
-                          Navigator.push(context, PageTransition(child: Login(), type: PageTransitionType.rightToLeft));
+                          Navigator.push(context, PageTransition(child: Login(stompManager: stompManager,), type: PageTransitionType.rightToLeft));
                         },
                         style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all(darkGreen),
@@ -43,7 +45,7 @@ class HomePage extends StatelessWidget {
                       padding:  EdgeInsets.only(top: paddingSize.top*0.3),
                       child: ElevatedButton(
                           onPressed: () {
-                            Navigator.push(context, PageTransition(child: const RegAccountName(), type: PageTransitionType.rightToLeft));
+                            Navigator.push(context, PageTransition(child: RegAccountName(stompManager: stompManager,), type: PageTransitionType.rightToLeft));
                           },
                           style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.all(lightGreen),

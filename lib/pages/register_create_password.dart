@@ -1,12 +1,14 @@
 import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
 import 'package:fe_mobile_chat_app/pages/register_phone_number.dart';
+import 'package:fe_mobile_chat_app/services/stomp_manager.dart';
 import 'package:fe_mobile_chat_app/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 
 class RegCreatePassword extends StatefulWidget {
-  const RegCreatePassword({super.key});
+  StompManager stompManager;
+  RegCreatePassword({super.key, required this.stompManager});
 
   @override
   State<RegCreatePassword> createState() => _RegCreatePasswordState();
@@ -46,7 +48,7 @@ class _RegCreatePasswordState extends State<RegCreatePassword> {
           automaticallyImplyLeading: false,
           leading: IconButton(
             onPressed: () {
-              Navigator.pop(context, PageTransition(child: const RegPhoneNumber(), type: PageTransitionType.leftToRight));
+              Navigator.pop(context, PageTransition(child: RegPhoneNumber(stompManager: widget.stompManager,), type: PageTransitionType.leftToRight));
             },
             color: darkGreen,
             icon: const Icon(Icons.arrow_back),

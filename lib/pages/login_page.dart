@@ -1,30 +1,69 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
+import 'package:fe_mobile_chat_app/model/UserToken.dart';
 import 'package:fe_mobile_chat_app/pages/home.dart';
 import 'package:fe_mobile_chat_app/pages/main_chat.dart';
+import 'package:fe_mobile_chat_app/services/stomp_manager.dart';
 import 'package:fe_mobile_chat_app/services/user_service.dart';
 import 'package:flutter/material.dart';
-import 'package:http/src/response.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:provider/provider.dart';
+import 'package:stomp_dart_client/stomp.dart';
+import 'package:stomp_dart_client/stomp_config.dart';
+import 'package:stomp_dart_client/stomp_frame.dart';
 
 class Login extends StatefulWidget {
-  const Login({super.key});
+  final StompManager stompManager;
+  const Login({super.key, required this.stompManager});
 
   @override
   State<Login> createState() => _LoginState();
 }
 
 class _LoginState extends State<Login> {
+  // late StompClient stompClient;
   final _controllerPhone = TextEditingController();
   final _controllerPass = TextEditingController();
   var _error = "";
 
   @override
+  void initState() {
+    super.initState();
+    // stompClient = StompClient(
+    //     config: StompConfig(
+    //   url: socketUrl,
+    //   onConnect: (frame) async {
+    //
+    //     print(frame.body);
+    //     await stompClient.subscribe(destination: "/topic/test", callback: (frame) {
+    //       print("subscribed login test");
+    //       print(jsonDecode(frame.body!));
+    //     },);
+    //   },
+    //   onWebSocketError: (dynamic error) {
+    //     print(error.toString());
+    //   },
+    // ));
+    // stompClient.activate();
+  }
+
+  // @override
+  // void dispose() {
+  //   stompProvider = Provider.of<StompProvider>(context, listen: false);
+  //   stompProvider.disconnect();
+  //   super.dispose();
+  // }
+
+  @override
   Widget build(BuildContext context) {
+    // stompClient = Provider.of<StompProvider>(context).stompClient!;
     final size = MediaQuery.of(context).size;
     final paddingSize = MediaQuery.of(context).padding;
+    // final StompService? stompService = StompProvider.of(context)?.stompService;
+
     String reponse = "";
     return Scaffold(
         appBar: AppBar(
@@ -35,7 +74,7 @@ class _LoginState extends State<Login> {
               Navigator.pop(
                   context,
                   PageTransition(
-                      child: const HomePage(),
+                      child: HomePage(stompManager: widget.stompManager,),
                       type: PageTransitionType.leftToRight));
             },
             color: darkGreen,
@@ -122,23 +161,41 @@ class _LoginState extends State<Login> {
                 ),
               ),
               ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     User user = User();
+                    UserToken userWithToken = UserToken();
+                    String token = '';
                     user = user.copyWith(
                         phone: _controllerPhone.text,
-                        password: _controllerPass.text);
-                    UserServices.login(user).then((value) => {
-                          print(_controllerPass.text),
-                          print(value.body.toString()),
-                          reponse = value.body.toString(),
-                          if (reponse == "true")
+                        password: _controllerPass.text,
+                        role: "USER");
+
+                    var data;
+
+                    await UserServices.login(user).then((value) => {
+                          token = value.body.toString(),
+                          if (value.statusCode == 202)
                             {
+                              userWithToken = userWithToken.copyWith(
+                                  user: user, token: token),
+
+                              print(user.toJson().toString()),
+                              // stompService?.send('/app/user.userOnline', JsonEncoder().convert(user.toJson())),
+                              // stompClient.send(
+                              //   destination: '/app/user.userOnline',
+                              //   body: JsonEncoder().convert(user.toJson()),
+                              // ),
+                              // stompClient.deactivate(),
+
+                              widget.stompManager.sendStompMessage("/app/user.userOnline", JsonEncoder().convert(user.toJson())),
+
                               Navigator.push(
                                   context,
                                   PageTransition(
-                                    child: const MainChat(),
-                                    type: PageTransitionType.rightToLeft,
-                                  ))
+                                      child: MainChat(stompManager: widget.stompManager,),
+                                      type: PageTransitionType.rightToLeft,
+                                      settings: RouteSettings(
+                                          arguments: userWithToken)))
                             }
                           else
                             {
@@ -152,8 +209,6 @@ class _LoginState extends State<Login> {
                               ))
                             }
                         });
-
-                    // if(reponse.body)
                   },
                   style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(darkGreen),
