@@ -1,5 +1,5 @@
 import 'package:fe_mobile_chat_app/constants.dart';
-import 'package:fe_mobile_chat_app/controllers/otp_service.dart';
+import 'package:fe_mobile_chat_app/services/otp_service.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
 import 'package:fe_mobile_chat_app/pages/home.dart';
 import 'package:fe_mobile_chat_app/pages/register_validation_phone.dart';

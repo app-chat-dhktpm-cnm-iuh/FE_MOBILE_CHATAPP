@@ -35,7 +35,6 @@ class UserServices {
         headers: headers,
         body: jsonEncode(user)
     );
-    print(reponse.statusCode);
     return reponse;
   }
 }

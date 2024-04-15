@@ -24,7 +24,6 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  // late StompClient stompClient;
   final _controllerPhone = TextEditingController();
   final _controllerPass = TextEditingController();
   var _error = "";
@@ -32,39 +31,12 @@ class _LoginState extends State<Login> {
   @override
   void initState() {
     super.initState();
-    // stompClient = StompClient(
-    //     config: StompConfig(
-    //   url: socketUrl,
-    //   onConnect: (frame) async {
-    //
-    //     print(frame.body);
-    //     await stompClient.subscribe(destination: "/topic/test", callback: (frame) {
-    //       print("subscribed login test");
-    //       print(jsonDecode(frame.body!));
-    //     },);
-    //   },
-    //   onWebSocketError: (dynamic error) {
-    //     print(error.toString());
-    //   },
-    // ));
-    // stompClient.activate();
   }
-
-  // @override
-  // void dispose() {
-  //   stompProvider = Provider.of<StompProvider>(context, listen: false);
-  //   stompProvider.disconnect();
-  //   super.dispose();
-  // }
 
   @override
   Widget build(BuildContext context) {
-    // stompClient = Provider.of<StompProvider>(context).stompClient!;
     final size = MediaQuery.of(context).size;
     final paddingSize = MediaQuery.of(context).padding;
-    // final StompService? stompService = StompProvider.of(context)?.stompService;
-
-    String reponse = "";
     return Scaffold(
         appBar: AppBar(
           backgroundColor: backgroundColor,
@@ -164,31 +136,17 @@ class _LoginState extends State<Login> {
                   onPressed: () async {
                     User user = User();
                     UserToken userWithToken = UserToken();
-                    String token = '';
+                    String responseBody;
                     user = user.copyWith(
                         phone: _controllerPhone.text,
                         password: _controllerPass.text,
                         role: "USER");
-
-                    var data;
-
                     await UserServices.login(user).then((value) => {
-                          token = value.body.toString(),
+                          responseBody = utf8.decode(value.bodyBytes),
+                          userWithToken = UserToken.fromJson(jsonDecode(responseBody)),
                           if (value.statusCode == 202)
                             {
-                              userWithToken = userWithToken.copyWith(
-                                  user: user, token: token),
-
-                              print(user.toJson().toString()),
-                              // stompService?.send('/app/user.userOnline', JsonEncoder().convert(user.toJson())),
-                              // stompClient.send(
-                              //   destination: '/app/user.userOnline',
-                              //   body: JsonEncoder().convert(user.toJson()),
-                              // ),
-                              // stompClient.deactivate(),
-
                               widget.stompManager.sendStompMessage("/app/user.userOnline", JsonEncoder().convert(user.toJson())),
-
                               Navigator.push(
                                   context,
                                   PageTransition(

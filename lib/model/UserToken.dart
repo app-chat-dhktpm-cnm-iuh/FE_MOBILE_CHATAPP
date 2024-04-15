@@ -10,7 +10,7 @@ class UserToken {
       UserToken(user: user ?? this.user, token: token ?? this.token);
 
   UserToken.fromJson(Map<String, dynamic> json) {
-    user = json['user'];
+    user = User.fromJson(json['user']);
     token = json['token'];
   }
 
@@ -19,5 +19,10 @@ class UserToken {
     data['user'] = user;
     data['token'] = token;
     return data;
+  }
+
+  @override
+  String toString() {
+    return 'UserToken{user: $user, token: $token}';
   }
 }
