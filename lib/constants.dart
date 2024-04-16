@@ -8,3 +8,6 @@ import 'package:flutter/material.dart';
  const Map<String, String> headers = {"Content-Type": "application/json", "Cache-Control": "no-cache"};
  const baseUserUrl = "http://10.0.2.2:8080";
  const socketUrl = 'ws://10.0.2.2:8080/websocket';
+ const LISTCHAT = "LIST-CHAT";
+ const CHAT = "CHAT";
+const PROFILE = "PROFILE";

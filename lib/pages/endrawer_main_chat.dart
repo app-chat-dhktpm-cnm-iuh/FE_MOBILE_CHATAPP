@@ -41,7 +41,7 @@ class _MyEndrawerState extends State<MyEndrawer> {
                 Padding(
                     padding: EdgeInsets.only(
                         top: size.width * 0.2, bottom: size.width * 0.02),
-                    child: FunctionService.createAvatar(avaUrl, size, name)),
+                    child: FunctionService.createAvatar(avaUrl, size, name, PROFILE)),
                 Text(
                   widget.currentUser.name.toString(),
                   style: TextStyle(fontSize: size.width * 0.04),

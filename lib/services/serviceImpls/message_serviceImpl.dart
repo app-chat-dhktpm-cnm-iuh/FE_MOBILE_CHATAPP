@@ -1,13 +1,13 @@
 import 'package:fe_mobile_chat_app/model/Message.dart';
 
 class MessageServiceImpl {
-  static Message getLastMessage(List<Message> messageList) {
+  static Message getLastMessage(List<Message>? messageList) {
     List<DateTime> dateTimeMessageList = List.empty(growable: true);
-    messageList.forEach((mess) {
+    messageList?.forEach((mess) {
       dateTimeMessageList.add(mess.sent_date_time!.toLocal());
     });
     DateTime nearestDatetime = findNearestDateTime(dateTimeMessageList);
-    List<Message> messages = messageList.where((mess) => mess.sent_date_time?.toLocal() == nearestDatetime).toList();
+    List<Message> messages = messageList!.where((mess) => mess.sent_date_time?.toLocal() == nearestDatetime).toList();
     return messages.first;
   }
 

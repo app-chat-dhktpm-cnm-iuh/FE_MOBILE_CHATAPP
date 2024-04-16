@@ -25,31 +25,20 @@ class ConversationServiceImpl {
     return conversationsResponse;
   }
 
-  static Future<String?> getNameConversation(
-      Conversation conversation, String current_phone) async {
-    User user = User();
-    String body = "";
-    String phoneMem = conversation.members!.first.toString();
-    dynamic detailDynamic;
-
-    if (conversation.title?.compareTo("") == 1 || conversation.title == null) {
-      if (conversation.creator_phone == current_phone) {
-        await UserServices.getUserDetailsByphone(phoneMem).then((detail) => {
-              body = utf8.decode(detail.bodyBytes),
-              detailDynamic = jsonDecode(body),
-              user = User.fromJson(detailDynamic)
-            });
-        return user.name;
-      } else {
-        await UserServices.getUserDetailsByphone(current_phone)
-            .then((detail) => {
-                  body = utf8.decode(detail.bodyBytes),
-                  detailDynamic = jsonDecode(body),
-                  user = User.fromJson(detailDynamic)
-                });
-        return user.name;
-      }
-    } else
-      return conversation.title;
+  static String? getNameConversation(
+      ConversationResponse conversationResponse, String current_phone) {
+    Conversation? conversation = conversationResponse.conversation;
+    List<User>? memberDetails = conversationResponse.memberDetails;
+    String? conversationName = "";
+    if (memberDetails!.length > 2) {
+      return conversation?.title;
+    } else {
+      memberDetails.forEach((member) {
+        if (member.phone != current_phone) {
+          conversationName = member.name;
+        }
+      });
+      return conversationName;
+    }
   }
 }

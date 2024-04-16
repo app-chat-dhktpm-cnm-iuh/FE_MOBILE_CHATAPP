@@ -188,7 +188,9 @@ class _MainChatState extends State<MainChat> {
                                         size,
                                         friendListCurrentUser[index]
                                             .name
-                                            .toString()),
+                                            .toString(),
+                                        LISTCHAT
+                                    ),
                                     trailing: IconButton(
                                       onPressed: () {},
                                       icon: const Icon(

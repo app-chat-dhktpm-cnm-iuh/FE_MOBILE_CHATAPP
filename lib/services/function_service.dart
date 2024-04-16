@@ -7,18 +7,39 @@ import 'package:fe_mobile_chat_app/services/serviceImpls/friend_serviceImpl.dart
 import 'package:flutter/material.dart';
 
 class FunctionService {
-  static CircleAvatar createAvatar(String? imgUrl, Size size, String userName) {
+  static CircleAvatar createAvatar(String? imgUrl, Size size, String userName, String TYPE) {
     Color randomColor = getRamdomColor();
+    var radiusValue;
+    var fontSizeValue;
+    switch(TYPE){
+      case "CHAT": {
+        radiusValue = size.width * 0.04;
+        fontSizeValue = size.width * 0.04;
+      }
+      case "LIST-CHAT": {
+        radiusValue = size.width * 0.05;
+        fontSizeValue = size.width * 0.05;
+      }
+      case "PROFILE": {
+        radiusValue = size.width * 0.1;
+        fontSizeValue = size.width * 0.1;
+      }
+      default: {
+        radiusValue = size.width * 0.1;
+        fontSizeValue = size.width * 0.05;
+      }
+    }
+
     if (imgUrl == "" || imgUrl == null || imgUrl == "null") {
       return CircleAvatar(
-        radius: size.width * 0.1,
+        radius: radiusValue,
         backgroundColor: randomColor,
         child: Text(
           userName.substring(0, 1),
           style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.normal,
-              fontSize: size.width * 0.05),
+              fontSize: fontSizeValue),
         ),
       );
     } else {
@@ -28,6 +49,8 @@ class FunctionService {
       );
     }
   }
+
+
 
   static Color getRamdomColor() {
     Random random = Random();

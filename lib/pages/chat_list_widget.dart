@@ -23,8 +23,6 @@ class _ChatsListWidgetState extends State<ChatsListWidget> {
   List<Conversation?> _conversationList = [];
   List<ConversationResponse> _conversationListResponse = [];
   String phone_current = "";
-  String? conversationName = "";
-
   @override
   void initState() {
     super.initState();
@@ -42,12 +40,14 @@ class _ChatsListWidgetState extends State<ChatsListWidget> {
   @override
   Widget build(BuildContext context) {
     _conversationList = [];
+    String? conversationName = "";
+    // _conversationListResponse = [];
     final size = MediaQuery.of(context).size;
     final padding = MediaQuery.of(context).padding;
 
-    for (var conv in _conversationListResponse) {
-      _conversationList.add(conv.conversation);
-    }
+    // for (var conv in _conversationListResponse) {
+    //   _conversationList.add(conv.conversation);
+    // }
     return Expanded(
       child: SingleChildScrollView(
         child: Column(
@@ -56,55 +56,50 @@ class _ChatsListWidgetState extends State<ChatsListWidget> {
               scrollDirection: Axis.vertical,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: _conversationList.length,
+              itemCount: _conversationListResponse.length,
               itemBuilder: (context, index) {
-                Conversation? conversation = _conversationList[index];
-                return FutureBuilder<String?>(
-                  future: ConversationServiceImpl.getNameConversation(conversation!, phone_current),
-                  builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
-                    if(snapshot.connectionState == ConnectionState.waiting) {
-                      return LinearProgressIndicator( color: lightGreen, minHeight: size.width*0.005,);
-                    } else {
-                      conversationName = snapshot.data;
-                      Message lastMessage = MessageServiceImpl.getLastMessage(
-                          conversation.messages!.toList());
-                      return ListTile(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              PageTransition(
-                                  child: ChatPage(
-                                    currentUser: currentUser!,
-                                    conversation: conversation,
-                                    conversationName: conversationName!,
-                                  ),
-                                  type: PageTransitionType.rightToLeft));
-                        },
-                        leading: FunctionService.createAvatar(
-                            conversation.ava_conversation_url?.toString(),
-                            size,
-                            conversationName.toString()),
-                        title: Text(
-                          conversationName.toString(),
-                          style: TextStyle(fontSize: size.width * 0.04),
-                        ),
-                        subtitle: Text(
-                          lastMessage.content.toString(),
-                          style: TextStyle(
-                              color: greyDark, fontSize: size.width * 0.035),
-                        ),
-                        trailing: Text(
-                          FunctionService.dateFormat(
-                              lastMessage.sent_date_time!.toLocal())
-                              .toString(),
-                          style: TextStyle(
-                              color: greyDark,
-                              fontWeight: FontWeight.normal,
-                              fontSize: size.width * 0.035),
-                        ),
-                      );
-                    }
+                ConversationResponse? conversationResponse = _conversationListResponse[index];
+                Conversation? conversation = conversationResponse.conversation;
+                Message lastMessage = MessageServiceImpl.getLastMessage(
+                    conversation?.messages!.toList());
+                conversationName = ConversationServiceImpl.getNameConversation(conversationResponse, phone_current);
+                return ListTile(
+                  onTap: () {
+                    conversationName = ConversationServiceImpl.getNameConversation(conversationResponse, phone_current);
+                    Navigator.push(
+                        context,
+                        PageTransition(
+                            child: ChatPage(
+                              currentUser: currentUser,
+                              conversationResponse: conversationResponse,
+                              conversationName: conversationName!,
+                            ),
+                            type: PageTransitionType.rightToLeft));
                   },
+                  leading: FunctionService.createAvatar(
+                      conversation!.ava_conversation_url?.toString(),
+                      size,
+                      conversationName.toString(),
+                      LISTCHAT
+                  ),
+                  title: Text(
+                    conversationName.toString(),
+                    style: TextStyle(fontSize: size.width * 0.04),
+                  ),
+                  subtitle: Text(
+                    lastMessage.content.toString(),
+                    style: TextStyle(
+                        color: greyDark, fontSize: size.width * 0.035),
+                  ),
+                  trailing: Text(
+                    FunctionService.dateFormat(
+                        lastMessage.sent_date_time!.toLocal())
+                        .toString(),
+                    style: TextStyle(
+                        color: greyDark,
+                        fontWeight: FontWeight.normal,
+                        fontSize: size.width * 0.035),
+                  ),
                 );
               },
             ),

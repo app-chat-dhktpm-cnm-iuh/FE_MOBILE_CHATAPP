@@ -1,3 +1,4 @@
+import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
 import 'package:fe_mobile_chat_app/services/function_service.dart';
 import 'package:fe_mobile_chat_app/services/serviceImpls/friend_serviceImpl.dart';
@@ -70,7 +71,9 @@ class _GroupTabState extends State<GroupTab> {
                         leading: FunctionService.createAvatar(
                             friend.avatarUrl.toString(),
                             size,
-                            friend.name.toString()),
+                            friend.name.toString(),
+                            LISTCHAT
+                        ),
                         title: Text(
                           friend.name.toString(),
                           style: TextStyle(fontSize: size.width * 0.04),
