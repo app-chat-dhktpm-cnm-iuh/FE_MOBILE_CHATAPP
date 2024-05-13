@@ -23,7 +23,7 @@ import '../model/Conversation.dart';
 
 class MainChat extends StatefulWidget {
   final StompManager stompManager;
-  const MainChat({super.key, required this.stompManager});
+  MainChat({super.key, required this.stompManager});
 
   @override
   State<MainChat> createState() => _MainChatState();
@@ -43,13 +43,18 @@ class _MainChatState extends State<MainChat> {
   @override
   void initState() {
     super.initState();
+    // widget.stompManager.subscribeToDestination("/topic/public").listen((frame) {
+    //   print("subscribe main chat");
+    //   List<String> values = [];
+    //   final body = frame.body;
+    //   values.add(body!);
+    //   print("Subscribe value topic: ${values}");
+    // });
 
-    widget.stompManager.subscribeToDestination("/topic/public").listen((frame) {
-      List<String> values = [];
-      final body = frame.body;
-      values.add(body!);
-      print("Subscribe value: ${values}");
-    });
+    widget.stompManager.subscribeToDestination("/topic/public", (frame) {
+      print("subscribe main chat");
+      print(frame.body);
+    },);
   }
 
   void onTabTapped(int index) {
@@ -59,19 +64,19 @@ class _MainChatState extends State<MainChat> {
       } else if (index == 1) {
         _tabBodies = FriendsListWidget(currentUser: currentUser!);
       } else if (index == 0) {
-        _tabBodies = ChatsListWidget(currentUser: currentUser!);
+        _tabBodies = ChatsListWidget(currentUser: currentUser, stompManager: widget.stompManager,);
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+
     userToken = ModalRoute.of(context)?.settings.arguments as UserToken;
     currentUser = userToken.user;
-    // print("current user: ${currentUser.toString()}");
     var size = MediaQuery.of(context).size;
     var padding = MediaQuery.of(context).padding;
-    _tabBodies ??= ChatsListWidget(currentUser: currentUser!);
+    _tabBodies ??= ChatsListWidget(currentUser: currentUser, stompManager: widget.stompManager,);
 
     return Scaffold(
       key: _scaffoldKey,

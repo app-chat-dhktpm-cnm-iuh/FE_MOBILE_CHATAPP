@@ -21,16 +21,22 @@ void main() async {
   runApp(MyApp(stompManager: stompManager));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final StompManager stompManager;
   MyApp({super.key, required this.stompManager});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(scaffoldBackgroundColor: backgroundColor),
-      home: HomePage(stompManager: stompManager),
+      home: HomePage(stompManager: widget.stompManager),
     );
   }
 }

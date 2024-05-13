@@ -30,7 +30,6 @@ class _MyEndrawerState extends State<MyEndrawer> {
 
   @override
   Widget build(BuildContext context) {
-    print(currentUser.toString());
     var size = MediaQuery.of(context).size;
     return Drawer(
       child: Container(

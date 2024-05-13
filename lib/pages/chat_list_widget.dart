@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/model/Conversation.dart';
 import 'package:fe_mobile_chat_app/model/ConversationResponse.dart';
 import 'package:fe_mobile_chat_app/model/Message.dart';
+import 'package:fe_mobile_chat_app/model/MessageRequest.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
 import 'package:fe_mobile_chat_app/pages/chat_page.dart';
 import 'package:fe_mobile_chat_app/pages/main_chat.dart';
@@ -11,9 +14,13 @@ import 'package:fe_mobile_chat_app/services/serviceImpls/message_serviceImpl.dar
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 
+import '../services/stomp_manager.dart';
+
 class ChatsListWidget extends StatefulWidget {
   User currentUser;
-  ChatsListWidget({super.key, required this.currentUser});
+  final StompManager stompManager;
+  ChatsListWidget(
+      {super.key, required this.currentUser, required this.stompManager});
 
   @override
   State<ChatsListWidget> createState() => _ChatsListWidgetState();
@@ -35,19 +42,18 @@ class _ChatsListWidgetState extends State<ChatsListWidget> {
                 _conversationListResponse = conversationResponse;
               })
             });
+
   }
 
   @override
   Widget build(BuildContext context) {
+    setState(() {
+
+    });
     _conversationList = [];
     String? conversationName = "";
-    // _conversationListResponse = [];
     final size = MediaQuery.of(context).size;
-    final padding = MediaQuery.of(context).padding;
 
-    // for (var conv in _conversationListResponse) {
-    //   _conversationList.add(conv.conversation);
-    // }
     return Expanded(
       child: SingleChildScrollView(
         child: Column(
@@ -58,14 +64,18 @@ class _ChatsListWidgetState extends State<ChatsListWidget> {
               physics: const NeverScrollableScrollPhysics(),
               itemCount: _conversationListResponse.length,
               itemBuilder: (context, index) {
-                ConversationResponse? conversationResponse = _conversationListResponse[index];
+                ConversationResponse? conversationResponse =
+                    _conversationListResponse[index];
                 Conversation? conversation = conversationResponse.conversation;
                 Message lastMessage = MessageServiceImpl.getLastMessage(
                     conversation?.messages!.toList());
-                conversationName = ConversationServiceImpl.getNameConversation(conversationResponse, phone_current);
+                conversationName = ConversationServiceImpl.getNameConversation(
+                    conversationResponse, phone_current);
                 return ListTile(
                   onTap: () {
-                    conversationName = ConversationServiceImpl.getNameConversation(conversationResponse, phone_current);
+                    conversationName =
+                        ConversationServiceImpl.getNameConversation(
+                            conversationResponse, phone_current);
                     Navigator.push(
                         context,
                         PageTransition(
@@ -73,6 +83,7 @@ class _ChatsListWidgetState extends State<ChatsListWidget> {
                               currentUser: currentUser,
                               conversationResponse: conversationResponse,
                               conversationName: conversationName!,
+                              stompManager: widget.stompManager,
                             ),
                             type: PageTransitionType.rightToLeft));
                   },
@@ -80,8 +91,7 @@ class _ChatsListWidgetState extends State<ChatsListWidget> {
                       conversation!.ava_conversation_url?.toString(),
                       size,
                       conversationName.toString(),
-                      LISTCHAT
-                  ),
+                      LISTCHAT),
                   title: Text(
                     conversationName.toString(),
                     style: TextStyle(fontSize: size.width * 0.04),
@@ -93,7 +103,7 @@ class _ChatsListWidgetState extends State<ChatsListWidget> {
                   ),
                   trailing: Text(
                     FunctionService.dateFormat(
-                        lastMessage.sent_date_time!.toLocal())
+                            lastMessage.sent_date_time!.toLocal())
                         .toString(),
                     style: TextStyle(
                         color: greyDark,

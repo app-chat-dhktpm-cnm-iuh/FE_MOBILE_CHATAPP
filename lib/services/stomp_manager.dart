@@ -46,13 +46,19 @@ class StompManager {
     // Send the STOMP message
     _stompClient?.send(destination: destination, body: body);
   }
-  Stream<StompFrame> subscribeToDestination(String destination) {
-    _messageStreamController = StreamController<StompFrame>();
-
-    _stompClient?.subscribe(destination: destination, callback: (frame) {
-      _messageStreamController.add(frame);
-    });
-
-    return _messageStreamController.stream;
+  // Stream<StompFrame> subscribeToDestination(String destination) {
+  //   _messageStreamController = StreamController<StompFrame>();
+  //
+  //   _stompClient?.subscribe(destination: destination, callback: (frame) {
+  //     _messageStreamController.add(frame);
+  //   });
+  //
+  //   return _messageStreamController.stream;
+  // }
+  void subscribeToDestination(String destination, void Function(StompFrame) callback) {
+    _stompClient?.subscribe(
+      destination: destination,
+      callback: callback,
+    );
   }
 }

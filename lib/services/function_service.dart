@@ -76,8 +76,4 @@ class FunctionService {
   static String dateFormat(DateTime date) {
     return '${date.day}-${date.month.toString().padLeft(2, '0')}-${date.year.toString().padLeft(2, '0')}';
   }
-
-  Future<String> fetchData() {
-    return Future.delayed(Duration(seconds: 2), () => 'Data fetched');
-  }
 }

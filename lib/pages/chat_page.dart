@@ -1,28 +1,30 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:fe_mobile_chat_app/constants.dart';
-import 'package:fe_mobile_chat_app/model/Conversation.dart';
 import 'package:fe_mobile_chat_app/model/ConversationResponse.dart';
 import 'package:fe_mobile_chat_app/model/Message.dart';
+import 'package:fe_mobile_chat_app/model/MessageRequest.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
 import 'package:fe_mobile_chat_app/services/function_service.dart';
-import 'package:fe_mobile_chat_app/services/serviceImpls/user_serviceImpl.dart';
-import 'package:fe_mobile_chat_app/services/user_service.dart';
+import 'package:fe_mobile_chat_app/services/serviceImpls/message_serviceImpl.dart';
+
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+
+import '../services/stomp_manager.dart';
 
 class ChatPage extends StatefulWidget {
   User currentUser;
   ConversationResponse conversationResponse;
   String conversationName;
+  StompManager stompManager;
   ChatPage(
       {super.key,
       required this.currentUser,
       required this.conversationResponse,
-      required this.conversationName});
+      required this.conversationName,
+        required this.stompManager
+      });
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -34,7 +36,12 @@ class _ChatPageState extends State<ChatPage> {
   List<Message> messages = [];
   List<User> userMemberDetails = [];
   final ScrollController _scrollController = ScrollController();
-  ScrollController _scrollControllerListView = new ScrollController();
+  final ScrollController _scrollControllerListView = ScrollController();
+  final TextEditingController _textFieldController = TextEditingController();
+
+  var sendFunctionVisible = true;
+  var sendMessageVisible = false;
+
 
   @override
   void initState() {
@@ -44,17 +51,45 @@ class _ChatPageState extends State<ChatPage> {
     messages = widget.conversationResponse.conversation!.messages!;
     userMemberDetails = widget.conversationResponse.memberDetails!;
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToEnd());
+    widget.stompManager.subscribeToDestination(
+      "/user/${currentUser.phone}/queue/messages",
+          (frame) {
+        print("subscribe chat list");
+        Map<String, dynamic> messageRequestJson = jsonDecode(frame.body!);
+        MessageRequest messageRequest =
+        MessageRequest.fromJson(messageRequestJson);
+        Message message = Message();
+        message = message.copyWith(
+            is_deleted: messageRequest.is_deleted,
+            sent_date_time: messageRequest.sent_date_time,
+            sender_phone: messageRequest.sender_phone,
+            content: messageRequest.content,
+            attaches: messageRequest.attaches,
+            sender_name: messageRequest.sender_name,
+            is_read: messageRequest.is_read);
+        if(widget.conversationResponse.conversation?.conversation_id == messageRequest.conversation_id) {
+          // widget.conversationResponse.conversation?.messages?.add(message);
+          messages.add(message);
+          _scrollToEnd();
+          setState(() {       });
+          print("Conversation in if: " + MessageServiceImpl.getLastMessage(messages).toString());
+        }
+
+        print(messageRequest.toString());
+      },
+    );
   }
 
   void _scrollToEnd() {
     _scrollControllerListView.animateTo(
-      _scrollControllerListView.position.maxScrollExtent*0.000000005,
+      _scrollControllerListView.position.maxScrollExtent + 500000000000000000,
       duration: const Duration(
         milliseconds: 300,
       ),
       curve: Curves.easeInOut,
     );
   }
+
 
 
   @override
@@ -66,8 +101,21 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final TextEditingController _textFieldController = TextEditingController();
     var height = size.height * 0.05;
+
+    void handleChangeIcon () {
+      if(_textFieldController.text == "") {
+        setState(() {
+          sendFunctionVisible = true;
+          sendMessageVisible = false;
+        });
+      } else {
+        setState(() {
+          sendFunctionVisible = false;
+          sendMessageVisible = true;
+        });
+      }
+    }
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -139,8 +187,9 @@ class _ChatPageState extends State<ChatPage> {
                               keyboardType: TextInputType.multiline,
                               maxLines: null,
                               onChanged: (value) {
+                                handleChangeIcon();
                                 _scrollController.jumpTo(
-                                    _scrollController.position.maxScrollExtent);
+                                    _scrollController.position.maxScrollExtent*5000000);
                               },
                               decoration: const InputDecoration(
                                 hintText: "Tin nhắn",
@@ -153,27 +202,65 @@ class _ChatPageState extends State<ChatPage> {
                       ),
                       Row(
                         children: [
-                          IconButton(
+                          Visibility(
+                            visible: sendFunctionVisible,
+                            child: IconButton(
                             icon: const Icon(
                               Icons.image_outlined,
                               color: lightGreen,
                             ),
                             onPressed: () {},
-                          ),
-                          IconButton(
+                          ),),
+                          Visibility(
+                            visible: sendFunctionVisible,
+                            child: IconButton(
                             icon: const Icon(
                               CupertinoIcons.paperclip,
                               color: lightGreen,
                             ),
                             onPressed: () {},
-                          ),
-                          IconButton(
+                          ),),
+
+                          Visibility(
+                            visible: sendFunctionVisible,
+                            child: IconButton(
                             icon: const Icon(
                               CupertinoIcons.mic_fill,
                               color: lightGreen,
                             ),
                             onPressed: () {},
-                          ),
+                          ),),
+                          Visibility(
+                            visible: sendMessageVisible,
+                            child: IconButton(
+                            icon: const Icon(
+                              Icons.send_rounded,
+                              color: lightGreen,
+                            ),
+                            onPressed: () {
+                                MessageRequest messageRequest = MessageRequest();
+                                List<String> attaches = [];
+                                String content = _textFieldController.text;
+                                String conversationID = widget.conversationResponse.conversation!.conversation_id!;
+                                List<String> members = widget.conversationResponse.conversation!.members!;
+                                String senderName = widget.currentUser.name!;
+                                String senderPhone = widget.currentUser.phone!;
+
+                                messageRequest = messageRequest.copyWith(
+                                    attaches: attaches,
+                                    content: content,
+                                    conversation_id: conversationID,
+                                    members: members,
+                                    sender_name: senderName,
+                                    sender_phone: senderPhone,
+                                    sent_date_time: DateTime.now().toLocal(),
+                                    is_deleted: false,
+                                    is_read: false
+                                );
+                                widget.stompManager.sendStompMessage("/app/chat", JsonEncoder().convert(messageRequest.toJson()));
+                                _textFieldController.clear();
+                            },
+                          ),),
                         ],
                       )
                     ],
@@ -209,7 +296,9 @@ class _ChatPageState extends State<ChatPage> {
         widget.conversationResponse.conversation!.members!.length;
     if (memberLength > 2) {
       return Row(
-        mainAxisAlignment: (message.sender_phone != currentUser.phone) ? MainAxisAlignment.start : MainAxisAlignment.end,
+        mainAxisAlignment: (message.sender_phone != currentUser.phone)
+            ? MainAxisAlignment.start
+            : MainAxisAlignment.end,
         children: [
           if (message.sender_phone != currentUser.phone)
             creatAva(message, size)!,
@@ -227,7 +316,9 @@ class _ChatPageState extends State<ChatPage> {
       );
     } else {
       return Row(
-        mainAxisAlignment: (message.sender_phone != currentUser.phone) ? MainAxisAlignment.start : MainAxisAlignment.end,
+        mainAxisAlignment: (message.sender_phone != currentUser.phone)
+            ? MainAxisAlignment.start
+            : MainAxisAlignment.end,
         children: [
           if (message.sender_phone != currentUser.phone)
             creatAva(message, size)!,
@@ -242,7 +333,6 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _buildMessageList(Size size, List<Message> messages) {
     return ListView.builder(
-      reverse: true,
       controller: _scrollControllerListView,
       itemCount: messages.length,
       itemBuilder: (context, index) {
@@ -255,6 +345,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 }
+
 
 class MessageBubble extends StatefulWidget {
   final Message message;
