@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:fe_mobile_chat_app/constants.dart';
+import 'package:fe_mobile_chat_app/model/Attach.dart';
 import 'package:fe_mobile_chat_app/model/ConversationResponse.dart';
 import 'package:fe_mobile_chat_app/model/Message.dart';
 import 'package:fe_mobile_chat_app/model/MessageRequest.dart';
@@ -60,7 +61,6 @@ class _ChatPageState extends State<ChatPage> {
         MessageRequest.fromJson(messageRequestJson);
         Message message = Message();
         message = message.copyWith(
-            is_deleted: messageRequest.is_deleted,
             sent_date_time: messageRequest.sent_date_time,
             sender_phone: messageRequest.sender_phone,
             content: messageRequest.content,
@@ -239,7 +239,7 @@ class _ChatPageState extends State<ChatPage> {
                             ),
                             onPressed: () {
                                 MessageRequest messageRequest = MessageRequest();
-                                List<String> attaches = [];
+                                List<Attach> attaches = [];
                                 String content = _textFieldController.text;
                                 String conversationID = widget.conversationResponse.conversation!.conversation_id!;
                                 List<String> members = widget.conversationResponse.conversation!.members!;
@@ -254,7 +254,6 @@ class _ChatPageState extends State<ChatPage> {
                                     sender_name: senderName,
                                     sender_phone: senderPhone,
                                     sent_date_time: DateTime.now().toLocal(),
-                                    is_deleted: false,
                                     is_read: false
                                 );
                                 widget.stompManager.sendStompMessage("/app/chat", JsonEncoder().convert(messageRequest.toJson()));
