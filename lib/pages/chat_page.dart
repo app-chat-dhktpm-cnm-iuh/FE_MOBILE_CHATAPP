@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/model/Attach.dart';
@@ -11,6 +12,7 @@ import 'package:fe_mobile_chat_app/services/serviceImpls/message_serviceImpl.dar
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../services/stomp_manager.dart';
 
@@ -89,6 +91,17 @@ class _ChatPageState extends State<ChatPage> {
       ),
       curve: Curves.easeInOut,
     );
+  }
+  List<File> _selectedImages = <File>[];
+
+  Future<void> _pickImages() async {
+    final List<XFile>? imageList = await ImagePicker().pickMultiImage();
+
+    if (imageList != null) {
+      setState(() {
+        _selectedImages = imageList.map((XFile file) => File(file.path)).toList();
+      });
+    }
   }
 
   @override
@@ -208,7 +221,7 @@ class _ChatPageState extends State<ChatPage> {
                               Icons.image_outlined,
                               color: lightGreen,
                             ),
-                            onPressed: () {},
+                            onPressed: _pickImages,
                           ),),
                           Visibility(
                             visible: sendFunctionVisible,
