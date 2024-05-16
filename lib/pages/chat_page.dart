@@ -91,8 +91,6 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-
-
   @override
   void dispose() {
     _scrollControllerListView.dispose();
@@ -295,39 +293,73 @@ class _ChatPageState extends State<ChatPage> {
     var memberLength =
         widget.conversationResponse.conversation!.members!.length;
     if (memberLength > 2) {
-      return Row(
-        mainAxisAlignment: (message.sender_phone != currentUser.phone)
-            ? MainAxisAlignment.start
-            : MainAxisAlignment.end,
-        children: [
-          if (message.sender_phone != currentUser.phone)
-            creatAva(message, size)!,
-          Column(
-            children: [
-              if (message.sender_phone != currentUser.phone)
-                Text(getMemName(message.sender_phone!)!),
-              MessageBubble(
-                message: message,
-                currentUser: currentUser,
-              ),
-            ],
-          ),
-        ],
-      );
+      if(message.sender_phone != null) {
+        return Row(
+          mainAxisAlignment: (message.sender_phone != currentUser.phone)
+              ? MainAxisAlignment.start
+              : MainAxisAlignment.end,
+          children: [
+            if (message.sender_phone != currentUser.phone && message.sender_phone != null)
+              creatAva(message, size)!,
+            Column(
+              children: [
+                if (message.sender_phone != currentUser.phone && message.sender_phone != null)
+                  Text(getMemName(message.sender_phone!)!),
+                MessageBubble(
+                  message: message,
+                  currentUser: currentUser,
+                ),
+              ],
+            ),
+          ],
+        );
+      } else {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Column(
+              children: [
+                if (message.sender_phone != currentUser.phone && message.sender_phone != null)
+                  Text(getMemName(message.sender_phone!)!),
+                MessageBubble(
+                  message: message,
+                  currentUser: currentUser,
+                ),
+              ],
+            ),
+          ],
+        );
+      }
+
     } else {
-      return Row(
-        mainAxisAlignment: (message.sender_phone != currentUser.phone)
-            ? MainAxisAlignment.start
-            : MainAxisAlignment.end,
-        children: [
-          if (message.sender_phone != currentUser.phone)
-            creatAva(message, size)!,
-          MessageBubble(
-            message: message,
-            currentUser: currentUser,
-          ),
-        ],
-      );
+      if(message.sender_phone != null) {
+        return Row(
+          mainAxisAlignment: (message.sender_phone != currentUser.phone)
+              ? MainAxisAlignment.start
+              : MainAxisAlignment.end,
+          children: [
+            if (message.sender_phone != currentUser.phone)
+              creatAva(message, size)!,
+            MessageBubble(
+              message: message,
+              currentUser: currentUser,
+            ),
+          ],
+        );
+      } else {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (message.sender_phone != currentUser.phone && message.sender_phone != null)
+              creatAva(message, size)!,
+            MessageBubble(
+              message: message,
+              currentUser: currentUser,
+            ),
+          ],
+        );
+      }
+
     }
   }
 
@@ -367,7 +399,7 @@ class _MessageBubbleState extends State<MessageBubble> {
     String? current_phone = widget.currentUser.phone;
 
     final size = MediaQuery.sizeOf(context);
-    final alignment = (sender_phone == current_phone)
+    var alignment = (sender_phone == current_phone)
         ? Alignment.centerRight
         : Alignment.centerLeft;
 
@@ -379,31 +411,62 @@ class _MessageBubbleState extends State<MessageBubble> {
         ? textColor = Colors.white
         : textColor = Colors.black;
 
-    final textAlign = (sender_phone == current_phone)
+    var textAlign = (sender_phone == current_phone)
         ? CrossAxisAlignment.end
         : CrossAxisAlignment.start;
-    return Align(
-      alignment: alignment,
-      child: Container(
-          constraints: BoxConstraints(maxWidth: size.width * 0.66),
-          padding: EdgeInsets.all(size.width * 0.02),
-          margin: EdgeInsets.all(size.width * 0.01),
-          decoration: BoxDecoration(
-              color: backgroundTextColor,
-              borderRadius: BorderRadius.circular(size.width * 0.03)),
-          child: Column(
-            crossAxisAlignment: textAlign,
-            children: [
-              Text(
-                widget.message.content ?? "",
-                style: TextStyle(fontSize: size.width * 0.04, color: textColor),
-              ),
-              Text(
-                "${widget.message.sent_date_time?.hour}:${widget.message.sent_date_time?.minute}",
-                style: TextStyle(fontSize: size.width * 0.04, color: textColor),
-              )
-            ],
-          )),
+    if(sender_phone != null) {
+      return Align(
+        alignment: alignment,
+        child: Container(
+            constraints: BoxConstraints(maxWidth: size.width * 0.66),
+            padding: EdgeInsets.all(size.width * 0.02),
+            margin: EdgeInsets.all(size.width * 0.01),
+            decoration: BoxDecoration(
+                color: backgroundTextColor,
+                borderRadius: BorderRadius.circular(size.width * 0.03)),
+            child: Column(
+              crossAxisAlignment: textAlign,
+              children: [
+                if(widget.message.content != null)
+                  Text(
+                    widget.message.content ?? "",
+                    style: TextStyle(fontSize: size.width * 0.04, color: textColor),
+                  ),
+                if(widget.message.images!.isNotEmpty)
+                  // ListView.builder(
+                  //   scrollDirection: Axis.vertical,
+                  //   shrinkWrap: true,
+                  //   itemCount: widget.message.images!.length,
+                  //   itemBuilder: (context, index) {
+                  //     final imageUrl = widget.message.images?[index];
+                  //     return Image.network(imageUrl!, fit: BoxFit.contain,);
+                  //   },)
+                  Wrap(
+                    spacing: 8.0,
+                    runSpacing: 8.0,
+                    children: [
+                      for(var imgUrl in widget.message.images!)
+                        Image.network(imgUrl, fit: BoxFit.cover,)
+
+                    ],
+                  )
+                ,
+                  Text(
+                    "${widget.message.sent_date_time?.hour}:${widget.message.sent_date_time?.minute}",
+                    style: TextStyle(fontSize: size.width * 0.04, color: textColor),
+                  )
+              ],
+            )),
+      );
+    } else {
+      return Align(
+      alignment: Alignment.center,
+      child: Text(
+          widget.message.content ?? "",
+          style: TextStyle(fontSize: size.width * 0.04, color: Colors.blueGrey)
+      ),
     );
+    }
+
   }
 }
