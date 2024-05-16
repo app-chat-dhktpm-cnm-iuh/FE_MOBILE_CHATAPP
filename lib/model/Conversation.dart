@@ -60,7 +60,11 @@ class Conversation {
       return DeleteConversationUser.fromJson(item);
     }).toList();
 
-    updated_at = DateTime.parse(json['updated_at']);
+    if(json['updated_at'].runtimeType == String) {
+      updated_at = DateTime.parse(json['updated_at']);
+    } else {
+      updated_at = DateTime.fromMillisecondsSinceEpoch(json['updated_at']);
+    }
 
     List<dynamic> memberJson = json['members'] as List<dynamic>;
     members = memberJson.map((dynamic item) {
@@ -81,7 +85,7 @@ class Conversation {
     data['creator_phone'] = creator_phone;
     data['ava_conversation_url'] = ava_conversation_url;
     data['deleteConversationUsers'] = deleteConversationUsers;
-    data['updated_at'] = updated_at;
+    data['updated_at'] = updated_at?.toIso8601String();
     data['members'] = members;
     data['messages'] = messages;
     return data;

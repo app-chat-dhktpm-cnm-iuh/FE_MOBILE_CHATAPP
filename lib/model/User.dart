@@ -52,7 +52,13 @@ class User {
     phone = json['phone'];
     password = json['password'];
     name = json['name'];
-    dateOfBirth = json['date_of_birth'];
+    if(json['date_of_birth'].runtimeType == String) {
+      dateOfBirth = DateTime.parse(json['date_of_birth']).toString();
+    } else if(json['date_of_birth'].runtimeType == int) {
+      dateOfBirth = DateTime.fromMillisecondsSinceEpoch(json['date_of_birth']).toString();
+    } else {
+      dateOfBirth = json['date_of_birth'];
+    }
     gender = json['gender'];
     is_activated = json['_activated'];
     avatarUrl = json['avatar_url'];

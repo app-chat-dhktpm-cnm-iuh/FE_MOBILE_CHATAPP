@@ -29,7 +29,6 @@ class FunctionService {
         fontSizeValue = size.width * 0.05;
       }
     }
-
     if (imgUrl == "" || imgUrl == null || imgUrl == "null") {
       return CircleAvatar(
         radius: radiusValue,
@@ -44,8 +43,8 @@ class FunctionService {
       );
     } else {
       return CircleAvatar(
-        radius: size.width * 0.1,
-        backgroundImage: AssetImage(imgUrl),
+        radius: radiusValue,
+        backgroundImage: NetworkImage(imgUrl),
       );
     }
   }

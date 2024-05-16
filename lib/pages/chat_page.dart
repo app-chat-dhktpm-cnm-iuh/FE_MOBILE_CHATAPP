@@ -52,6 +52,7 @@ class _ChatPageState extends State<ChatPage> {
     messages = widget.conversationResponse.conversation!.messages!;
     userMemberDetails = widget.conversationResponse.memberDetails!;
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToEnd());
+    //Update new message into list message of the conversation
     widget.stompManager.subscribeToDestination(
       "/user/${currentUser.phone}/queue/messages",
           (frame) {

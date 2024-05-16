@@ -68,7 +68,11 @@ class Message {
       return Attach.fromJson(item);
     }).toList();
 
-    sent_date_time = DateTime.parse(json['sent_date_time']);
+    if(json['sent_date_time'].runtimeType == String) {
+      sent_date_time = DateTime.parse(json['sent_date_time']);
+    } else {
+      sent_date_time = DateTime.fromMillisecondsSinceEpoch(json['sent_date_time']);
+    }
 
     List<dynamic> deleteList = json['phoneDeleteList'] as List<dynamic>;
     phoneDeleteList = deleteList.map((dynamic item) {
