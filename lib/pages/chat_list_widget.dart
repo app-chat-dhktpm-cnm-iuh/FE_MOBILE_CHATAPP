@@ -116,6 +116,27 @@ class _ChatsListWidgetState extends State<ChatsListWidget> {
                   });
                 }
 
+                String subtitle;
+                if(lastMessage.images!.isNotEmpty) {
+                  if(lastMessage.sender_phone != currentUser.phone) {
+                    subtitle = "${lastMessage.sender_name}: [Đã gửi ${lastMessage.images!.length} hình ảnh]";
+                  } else {
+                    subtitle = "Bạn: [Đã gửi ${lastMessage.images!.length} hình ảnh]";
+                  }
+                } else if(lastMessage.attaches!.isNotEmpty) {
+                  if(lastMessage.sender_phone != currentUser.phone) {
+                    subtitle = "${lastMessage.sender_name}: [Đã gửi ${lastMessage.images!.length} tập tin]";
+                  } else {
+                    subtitle = "Bạn: [Đã gửi ${lastMessage.images!.length} tập tin]";
+                  }
+                } else {
+                  if(lastMessage.sender_phone != currentUser.phone) {
+                    subtitle = "${lastMessage.sender_name}: ${lastMessage.content}";
+                  } else {
+                    subtitle = "Bạn: ${lastMessage.content}";
+                  }
+                }
+
                 return ListTile(
                   onTap: () {
                     conversationName =
@@ -142,7 +163,7 @@ class _ChatsListWidgetState extends State<ChatsListWidget> {
                     style: TextStyle(fontSize: size.width * 0.04),
                   ),
                   subtitle: Text(
-                    lastMessage.content.toString(),
+                    subtitle,
                     style: TextStyle(
                         color: greyDark, fontSize: size.width * 0.035),
                   ),
