@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:ui';
 
 import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/model/Attach.dart';
@@ -12,7 +12,9 @@ import 'package:fe_mobile_chat_app/services/serviceImpls/message_serviceImpl.dar
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter/widgets.dart';
+import 'package:gallery_picker/gallery_picker.dart';
+import 'package:media_picker_widget/media_picker_widget.dart';
 
 import '../services/stomp_manager.dart';
 
@@ -26,8 +28,7 @@ class ChatPage extends StatefulWidget {
       required this.currentUser,
       required this.conversationResponse,
       required this.conversationName,
-        required this.stompManager
-      });
+      required this.stompManager});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -44,7 +45,7 @@ class _ChatPageState extends State<ChatPage> {
 
   var sendFunctionVisible = true;
   var sendMessageVisible = false;
-
+  List<Media> mediaList = [];
 
   @override
   void initState() {
@@ -57,11 +58,11 @@ class _ChatPageState extends State<ChatPage> {
     //Update new message into list message of the conversation
     widget.stompManager.subscribeToDestination(
       "/user/${currentUser.phone}/queue/messages",
-          (frame) {
+      (frame) {
         print("subscribe chat list");
         Map<String, dynamic> messageRequestJson = jsonDecode(frame.body!);
         MessageRequest messageRequest =
-        MessageRequest.fromJson(messageRequestJson);
+            MessageRequest.fromJson(messageRequestJson);
         Message message = Message();
         message = message.copyWith(
             sent_date_time: messageRequest.sent_date_time,
@@ -70,12 +71,14 @@ class _ChatPageState extends State<ChatPage> {
             attaches: messageRequest.attaches,
             sender_name: messageRequest.sender_name,
             is_read: messageRequest.is_read);
-        if(widget.conversationResponse.conversation?.conversation_id == messageRequest.conversation_id) {
+        if (widget.conversationResponse.conversation?.conversation_id ==
+            messageRequest.conversation_id) {
           // widget.conversationResponse.conversation?.messages?.add(message);
           messages.add(message);
           _scrollToEnd();
-          setState(() {       });
-          print("Conversation in if: " + MessageServiceImpl.getLastMessage(messages).toString());
+          setState(() {});
+          print("Conversation in if: " +
+              MessageServiceImpl.getLastMessage(messages).toString());
         }
 
         print(messageRequest.toString());
@@ -92,16 +95,21 @@ class _ChatPageState extends State<ChatPage> {
       curve: Curves.easeInOut,
     );
   }
-  List<File> _selectedImages = <File>[];
 
-  Future<void> _pickImages() async {
-    final List<XFile>? imageList = await ImagePicker().pickMultiImage();
-
-    if (imageList != null) {
-      setState(() {
-        _selectedImages = imageList.map((XFile file) => File(file.path)).toList();
-      });
-    }
+  List<MediaFile> selectedMedias = [];
+  bool _isOpenPicker = false;
+  bool _showPreviewMedia = false;
+  late List<MediaFile>? medias;
+  Future<void> pickMedia() async {
+    setState(() {
+      if (_isOpenPicker == false) {
+        _isOpenPicker = true;
+        if(_showPreviewMedia == true) {
+          _showPreviewMedia = false;
+        }
+      } else
+        _isOpenPicker = false;
+    });
   }
 
   @override
@@ -115,8 +123,8 @@ class _ChatPageState extends State<ChatPage> {
     final size = MediaQuery.of(context).size;
     var height = size.height * 0.05;
 
-    void handleChangeIcon () {
-      if(_textFieldController.text == "") {
+    void handleChangeIcon() {
+      if (_textFieldController.text == "") {
         setState(() {
           sendFunctionVisible = true;
           sendMessageVisible = false;
@@ -128,10 +136,12 @@ class _ChatPageState extends State<ChatPage> {
         });
       }
     }
+
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
+          //Icon back
           leading: IconButton(
             onPressed: () {
               Navigator.pop(context);
@@ -142,6 +152,7 @@ class _ChatPageState extends State<ChatPage> {
               color: Colors.white,
             ),
           ),
+          //Conversation name
           title: Text(
             conversationName,
             style: TextStyle(
@@ -151,18 +162,21 @@ class _ChatPageState extends State<ChatPage> {
           ),
           backgroundColor: lightGreen,
           actions: [
+            //Icon voice call
             IconButton(
                 icon: const Icon(
                   Icons.call,
                   color: Colors.white,
                 ),
                 onPressed: () {}),
+            //Icon video call
             IconButton(
                 icon: const Icon(
                   Icons.videocam,
                   color: Colors.white,
                 ),
                 onPressed: () {}),
+            //Icon more infomation chat
             IconButton(
                 icon: const Icon(
                   Icons.more_horiz_outlined,
@@ -182,6 +196,7 @@ class _ChatPageState extends State<ChatPage> {
                   color: Colors.white,
                   child: Row(
                     children: [
+                      //Emoji button
                       IconButton(
                         icon: const Icon(
                           Icons.emoji_emotions,
@@ -189,6 +204,7 @@ class _ChatPageState extends State<ChatPage> {
                         ),
                         onPressed: () {},
                       ),
+                      //Input type chat
                       Expanded(
                         child: Container(
                           height: height,
@@ -201,7 +217,8 @@ class _ChatPageState extends State<ChatPage> {
                               onChanged: (value) {
                                 handleChangeIcon();
                                 _scrollController.jumpTo(
-                                    _scrollController.position.maxScrollExtent*5000000);
+                                    _scrollController.position.maxScrollExtent *
+                                        5000000);
                               },
                               decoration: const InputDecoration(
                                 hintText: "Tin nhắn",
@@ -214,47 +231,60 @@ class _ChatPageState extends State<ChatPage> {
                       ),
                       Row(
                         children: [
+                          //Send Image Button
                           Visibility(
                             visible: sendFunctionVisible,
                             child: IconButton(
-                            icon: const Icon(
-                              Icons.image_outlined,
-                              color: lightGreen,
+                              icon: const Icon(
+                                Icons.image_outlined,
+                                color: lightGreen,
+                              ),
+                              onPressed: pickMedia,
                             ),
-                            onPressed: _pickImages,
-                          ),),
+                          ),
+                          //Send Attach Button
                           Visibility(
                             visible: sendFunctionVisible,
                             child: IconButton(
-                            icon: const Icon(
-                              CupertinoIcons.paperclip,
-                              color: lightGreen,
+                              icon: const Icon(
+                                CupertinoIcons.paperclip,
+                                color: lightGreen,
+                              ),
+                              onPressed: () {},
                             ),
-                            onPressed: () {},
-                          ),),
-
+                          ),
+                          //Send voice recorder button
                           Visibility(
                             visible: sendFunctionVisible,
                             child: IconButton(
-                            icon: const Icon(
-                              CupertinoIcons.mic_fill,
-                              color: lightGreen,
+                              icon: const Icon(
+                                CupertinoIcons.mic_fill,
+                                color: lightGreen,
+                              ),
+                              onPressed: () {},
                             ),
-                            onPressed: () {},
-                          ),),
+                          ),
+                          //Send message button
                           Visibility(
                             visible: sendMessageVisible,
                             child: IconButton(
-                            icon: const Icon(
-                              Icons.send_rounded,
-                              color: lightGreen,
-                            ),
-                            onPressed: () {
-                                MessageRequest messageRequest = MessageRequest();
+                              icon: const Icon(
+                                Icons.send_rounded,
+                                color: lightGreen,
+                              ),
+                              onPressed: () {
+                                MessageRequest messageRequest =
+                                    MessageRequest();
                                 List<Attach> attaches = [];
                                 String content = _textFieldController.text;
-                                String conversationID = widget.conversationResponse.conversation!.conversation_id!;
-                                List<String> members = widget.conversationResponse.conversation!.members!;
+                                String conversationID = widget
+                                    .conversationResponse
+                                    .conversation!
+                                    .conversation_id!;
+                                List<String> members = widget
+                                    .conversationResponse
+                                    .conversation!
+                                    .members!;
                                 String senderName = widget.currentUser.name!;
                                 String senderPhone = widget.currentUser.phone!;
 
@@ -266,18 +296,139 @@ class _ChatPageState extends State<ChatPage> {
                                     sender_name: senderName,
                                     sender_phone: senderPhone,
                                     sent_date_time: DateTime.now().toLocal(),
-                                    is_read: false
-                                );
-                                widget.stompManager.sendStompMessage("/app/chat", JsonEncoder().convert(messageRequest.toJson()));
+                                    is_read: false);
+                                widget.stompManager.sendStompMessage(
+                                    "/app/chat",
+                                    JsonEncoder()
+                                        .convert(messageRequest.toJson()));
                                 _textFieldController.clear();
-                            },
-                          ),),
+                              },
+                            ),
+                          ),
                         ],
                       )
                     ],
                   ),
                 ),
-              )
+              ),
+              //Show image picker
+              Visibility(
+                  visible: _isOpenPicker,
+                  child: Container(
+                    height: 450,
+                    child: MediaPicker(
+                      mediaList: mediaList,
+                      onPicked: (selectedList) {
+                        setState(() {
+                          mediaList = selectedList;
+                          _isOpenPicker = false;
+                          _showPreviewMedia = true;
+                        });
+                      },
+                      onCancel: () => {
+                        setState(() {
+                          _isOpenPicker = false;
+                          if(mediaList.isNotEmpty) {
+                            _showPreviewMedia = true;
+                          }
+                        })
+                      },
+                      decoration: PickerDecoration(
+                        cancelIcon: const Icon(
+                          CupertinoIcons.clear,
+                          color: darkGreen,
+                        ),
+                        completeText: "Chọn",
+                        completeButtonStyle: const ButtonStyle(
+                            backgroundColor:
+                                MaterialStatePropertyAll<Color>(lightGreen)),
+                        counterBuilder: (context, index) {
+                          if (index == null) return const SizedBox();
+                          return Align(
+                            alignment: Alignment.topRight,
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                  top: size.width * 0.001,
+                                  right: size.width * 0.01),
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                    color: lightGreen, shape: BoxShape.circle),
+                                padding: EdgeInsets.all(size.width * 0.015),
+                                child: Text(
+                                  "$index",
+                                  style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  )),
+              //Show image preview
+              Visibility(
+                  visible: _showPreviewMedia,
+                  child: SizedBox(
+                      height: 150,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                shrinkWrap: true,
+                                itemCount: mediaList.length,
+                                itemBuilder: (context, index) {
+                                  //Render Image item
+                                  return Stack(
+                                    children: [
+                                      Container(
+                                        margin: EdgeInsets.all(size.width*0.025),
+                                        child: Container(
+                                          width: size.width*0.25,
+                                          height: size.width*0.25,
+                                          child: Image.memory(
+                                            mediaList[index].thumbnail!,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                      PositionedDirectional(
+                                          end: -size.width*0.025,
+                                          top: -size.width*0.025,
+                                          child: IconButton(
+                                            icon: Icon(Icons.cancel, color: lightGreen,),
+                                            onPressed: () {
+                                              setState(() {
+                                                mediaList.removeAt(index);
+                                                if(mediaList.isEmpty) {
+                                                  _showPreviewMedia = false;
+                                                }
+                                              });
+                                            },
+                                          )
+                                      )
+                                    ],
+                                  );
+                                },
+                              ),
+                              IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _showPreviewMedia = false;
+                                      _isOpenPicker = true;
+                                    });
+                                  },
+                                  icon: const Icon(Icons.add, color: lightGreen,)
+                              )
+                            ],
+                          ),
+                        ),
+                      )))
             ],
           ),
         ),
@@ -306,17 +457,19 @@ class _ChatPageState extends State<ChatPage> {
     var memberLength =
         widget.conversationResponse.conversation!.members!.length;
     if (memberLength > 2) {
-      if(message.sender_phone != null) {
+      if (message.sender_phone != null) {
         return Row(
           mainAxisAlignment: (message.sender_phone != currentUser.phone)
               ? MainAxisAlignment.start
               : MainAxisAlignment.end,
           children: [
-            if (message.sender_phone != currentUser.phone && message.sender_phone != null)
+            if (message.sender_phone != currentUser.phone &&
+                message.sender_phone != null)
               creatAva(message, size)!,
             Column(
               children: [
-                if (message.sender_phone != currentUser.phone && message.sender_phone != null)
+                if (message.sender_phone != currentUser.phone &&
+                    message.sender_phone != null)
                   Text(getMemName(message.sender_phone!)!),
                 MessageBubble(
                   message: message,
@@ -332,7 +485,8 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             Column(
               children: [
-                if (message.sender_phone != currentUser.phone && message.sender_phone != null)
+                if (message.sender_phone != currentUser.phone &&
+                    message.sender_phone != null)
                   Text(getMemName(message.sender_phone!)!),
                 MessageBubble(
                   message: message,
@@ -343,9 +497,8 @@ class _ChatPageState extends State<ChatPage> {
           ],
         );
       }
-
     } else {
-      if(message.sender_phone != null) {
+      if (message.sender_phone != null) {
         return Row(
           mainAxisAlignment: (message.sender_phone != currentUser.phone)
               ? MainAxisAlignment.start
@@ -363,7 +516,8 @@ class _ChatPageState extends State<ChatPage> {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (message.sender_phone != currentUser.phone && message.sender_phone != null)
+            if (message.sender_phone != currentUser.phone &&
+                message.sender_phone != null)
               creatAva(message, size)!,
             MessageBubble(
               message: message,
@@ -372,7 +526,6 @@ class _ChatPageState extends State<ChatPage> {
           ],
         );
       }
-
     }
   }
 
@@ -390,7 +543,6 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 }
-
 
 class MessageBubble extends StatefulWidget {
   final Message message;
@@ -427,7 +579,7 @@ class _MessageBubbleState extends State<MessageBubble> {
     var textAlign = (sender_phone == current_phone)
         ? CrossAxisAlignment.end
         : CrossAxisAlignment.start;
-    if(sender_phone != null) {
+    if (sender_phone != null) {
       return Align(
         alignment: alignment,
         child: Container(
@@ -440,12 +592,13 @@ class _MessageBubbleState extends State<MessageBubble> {
             child: Column(
               crossAxisAlignment: textAlign,
               children: [
-                if(widget.message.content != null)
+                if (widget.message.content != null)
                   Text(
                     widget.message.content ?? "",
-                    style: TextStyle(fontSize: size.width * 0.04, color: textColor),
+                    style: TextStyle(
+                        fontSize: size.width * 0.04, color: textColor),
                   ),
-                if(widget.message.images!.isNotEmpty)
+                if (widget.message.images!.isNotEmpty)
                   // ListView.builder(
                   //   scrollDirection: Axis.vertical,
                   //   shrinkWrap: true,
@@ -458,28 +611,28 @@ class _MessageBubbleState extends State<MessageBubble> {
                     spacing: 8.0,
                     runSpacing: 8.0,
                     children: [
-                      for(var imgUrl in widget.message.images!)
-                        Image.network(imgUrl, fit: BoxFit.cover,)
-
+                      for (var imgUrl in widget.message.images!)
+                        Image.network(
+                          imgUrl,
+                          fit: BoxFit.cover,
+                        )
                     ],
-                  )
-                ,
-                  Text(
-                    "${widget.message.sent_date_time?.hour}:${widget.message.sent_date_time?.minute}",
-                    style: TextStyle(fontSize: size.width * 0.04, color: textColor),
-                  )
+                  ),
+                Text(
+                  "${widget.message.sent_date_time?.hour}:${widget.message.sent_date_time?.minute}",
+                  style:
+                      TextStyle(fontSize: size.width * 0.04, color: textColor),
+                )
               ],
             )),
       );
     } else {
       return Align(
-      alignment: Alignment.center,
-      child: Text(
-          widget.message.content ?? "",
-          style: TextStyle(fontSize: size.width * 0.04, color: Colors.blueGrey)
-      ),
-    );
+        alignment: Alignment.center,
+        child: Text(widget.message.content ?? "",
+            style:
+                TextStyle(fontSize: size.width * 0.04, color: Colors.blueGrey)),
+      );
     }
-
   }
 }
