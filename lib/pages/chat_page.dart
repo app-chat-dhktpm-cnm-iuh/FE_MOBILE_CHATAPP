@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gallery_picker/gallery_picker.dart';
 import 'package:media_picker_widget/media_picker_widget.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 import '../services/stomp_manager.dart';
 
@@ -46,6 +47,7 @@ class _ChatPageState extends State<ChatPage> {
   var sendFunctionVisible = true;
   var sendMessageVisible = false;
   List<Media> mediaList = [];
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -77,8 +79,6 @@ class _ChatPageState extends State<ChatPage> {
           messages.add(message);
           _scrollToEnd();
           setState(() {});
-          print("Conversation in if: " +
-              MessageServiceImpl.getLastMessage(messages).toString());
         }
 
         print(messageRequest.toString());
@@ -102,10 +102,14 @@ class _ChatPageState extends State<ChatPage> {
   late List<MediaFile>? medias;
   Future<void> pickMedia() async {
     setState(() {
+      _focusNode.unfocus();
       if (_isOpenPicker == false) {
         _isOpenPicker = true;
-        if(_showPreviewMedia == true) {
+        if (_showPreviewMedia == true) {
           _showPreviewMedia = false;
+        }
+        if (sendMessageVisible == true) {
+          sendMessageVisible = false;
         }
       } else
         _isOpenPicker = false;
@@ -185,251 +189,309 @@ class _ChatPageState extends State<ChatPage> {
                 onPressed: () {}),
           ],
         ),
-        body: Padding(
-          padding: EdgeInsets.only(top: size.width * 0.01),
-          child: Column(
-            children: [
-              Expanded(child: _buildMessageList(size, messages)),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  color: Colors.white,
-                  child: Row(
-                    children: [
-                      //Emoji button
-                      IconButton(
-                        icon: const Icon(
-                          Icons.emoji_emotions,
-                          color: lightGreen,
-                        ),
-                        onPressed: () {},
-                      ),
-                      //Input type chat
-                      Expanded(
-                        child: Container(
-                          height: height,
-                          child: SingleChildScrollView(
-                            controller: _scrollController,
-                            child: TextField(
-                              controller: _textFieldController,
-                              keyboardType: TextInputType.multiline,
-                              maxLines: null,
-                              onChanged: (value) {
-                                handleChangeIcon();
-                                _scrollController.jumpTo(
-                                    _scrollController.position.maxScrollExtent *
-                                        5000000);
-                              },
-                              decoration: const InputDecoration(
-                                hintText: "Tin nhắn",
-                                hintStyle: TextStyle(color: greyDark),
-                                border: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          //Send Image Button
-                          Visibility(
-                            visible: sendFunctionVisible,
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.image_outlined,
-                                color: lightGreen,
-                              ),
-                              onPressed: pickMedia,
-                            ),
-                          ),
-                          //Send Attach Button
-                          Visibility(
-                            visible: sendFunctionVisible,
-                            child: IconButton(
-                              icon: const Icon(
-                                CupertinoIcons.paperclip,
-                                color: lightGreen,
-                              ),
-                              onPressed: () {},
-                            ),
-                          ),
-                          //Send voice recorder button
-                          Visibility(
-                            visible: sendFunctionVisible,
-                            child: IconButton(
-                              icon: const Icon(
-                                CupertinoIcons.mic_fill,
-                                color: lightGreen,
-                              ),
-                              onPressed: () {},
-                            ),
-                          ),
-                          //Send message button
-                          Visibility(
-                            visible: sendMessageVisible,
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.send_rounded,
-                                color: lightGreen,
-                              ),
-                              onPressed: () {
-                                MessageRequest messageRequest =
-                                    MessageRequest();
-                                List<Attach> attaches = [];
-                                String content = _textFieldController.text;
-                                String conversationID = widget
-                                    .conversationResponse
-                                    .conversation!
-                                    .conversation_id!;
-                                List<String> members = widget
-                                    .conversationResponse
-                                    .conversation!
-                                    .members!;
-                                String senderName = widget.currentUser.name!;
-                                String senderPhone = widget.currentUser.phone!;
-
-                                messageRequest = messageRequest.copyWith(
-                                    attaches: attaches,
-                                    content: content,
-                                    conversation_id: conversationID,
-                                    members: members,
-                                    sender_name: senderName,
-                                    sender_phone: senderPhone,
-                                    sent_date_time: DateTime.now().toLocal(),
-                                    is_read: false);
-                                widget.stompManager.sendStompMessage(
-                                    "/app/chat",
-                                    JsonEncoder()
-                                        .convert(messageRequest.toJson()));
-                                _textFieldController.clear();
-                              },
-                            ),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              //Show image picker
-              Visibility(
-                  visible: _isOpenPicker,
+        body: GestureDetector(
+          onTap: () {
+            _focusNode.unfocus();
+          },
+          child: Padding(
+            padding: EdgeInsets.only(top: size.width * 0.01),
+            child: Column(
+              children: [
+                Expanded(child: _buildMessageList(size, messages)),
+                Align(
+                  alignment: Alignment.bottomCenter,
                   child: Container(
-                    height: 450,
-                    child: MediaPicker(
-                      mediaList: mediaList,
-                      onPicked: (selectedList) {
-                        setState(() {
-                          mediaList = selectedList;
-                          _isOpenPicker = false;
-                          _showPreviewMedia = true;
-                        });
-                      },
-                      onCancel: () => {
-                        setState(() {
-                          _isOpenPicker = false;
-                          if(mediaList.isNotEmpty) {
-                            _showPreviewMedia = true;
-                          }
-                        })
-                      },
-                      decoration: PickerDecoration(
-                        cancelIcon: const Icon(
-                          CupertinoIcons.clear,
-                          color: darkGreen,
+                    color: Colors.white,
+                    child: Row(
+                      children: [
+                        //Emoji button
+                        IconButton(
+                          icon: const Icon(
+                            Icons.emoji_emotions,
+                            color: lightGreen,
+                          ),
+                          onPressed: () {},
                         ),
-                        completeText: "Chọn",
-                        completeButtonStyle: const ButtonStyle(
-                            backgroundColor:
-                                MaterialStatePropertyAll<Color>(lightGreen)),
-                        counterBuilder: (context, index) {
-                          if (index == null) return const SizedBox();
-                          return Align(
-                            alignment: Alignment.topRight,
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                  top: size.width * 0.001,
-                                  right: size.width * 0.01),
-                              child: Container(
-                                decoration: const BoxDecoration(
-                                    color: lightGreen, shape: BoxShape.circle),
-                                padding: EdgeInsets.all(size.width * 0.015),
-                                child: Text(
-                                  "$index",
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
+                        //Input type chat
+                        Expanded(
+                          child: Container(
+                            height: height,
+                            child: SingleChildScrollView(
+                              controller: _scrollController,
+                              child: TextField(
+                                controller: _textFieldController,
+                                keyboardType: TextInputType.multiline,
+                                maxLines: null,
+                                focusNode: _focusNode,
+                                onTap: () {
+                                  setState(() {
+                                    _showPreviewMedia = false;
+                                    _isOpenPicker = false;
+                                    mediaList.clear();
+                                  });
+                                },
+                                onChanged: (value) {
+                                  handleChangeIcon();
+                                  _scrollController.jumpTo(_scrollController
+                                          .position.maxScrollExtent *
+                                      5000000);
+                                  setState(() {
+                                    _showPreviewMedia = false;
+                                    mediaList.clear();
+                                  });
+                                },
+                                decoration: const InputDecoration(
+                                  hintText: "Tin nhắn",
+                                  hintStyle: TextStyle(color: greyDark),
+                                  border: InputBorder.none,
                                 ),
                               ),
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            //Send Image Button
+                            Visibility(
+                              visible: sendFunctionVisible,
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.image_outlined,
+                                  color: lightGreen,
+                                ),
+                                onPressed: pickMedia,
+                              ),
+                            ),
+                            //Send Attach Button
+                            Visibility(
+                              visible: sendFunctionVisible,
+                              child: IconButton(
+                                icon: const Icon(
+                                  CupertinoIcons.paperclip,
+                                  color: lightGreen,
+                                ),
+                                onPressed: () {},
+                              ),
+                            ),
+                            //Send voice recorder button
+                            Visibility(
+                              visible: sendFunctionVisible,
+                              child: IconButton(
+                                icon: const Icon(
+                                  CupertinoIcons.mic_fill,
+                                  color: lightGreen,
+                                ),
+                                onPressed: () {},
+                              ),
+                            ),
+                            //Send message button
+                            Visibility(
+                              visible: sendMessageVisible,
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.send_rounded,
+                                  color: lightGreen,
+                                ),
+                                onPressed: () {
+                                  MessageRequest messageRequest =
+                                      MessageRequest();
+                                  List<Attach> attaches = [];
+                                  String content = _textFieldController.text;
+                                  String conversationID = widget
+                                      .conversationResponse
+                                      .conversation!
+                                      .conversation_id!;
+                                  List<String> members = widget
+                                      .conversationResponse
+                                      .conversation!
+                                      .members!;
+                                  String senderName = widget.currentUser.name!;
+                                  String senderPhone =
+                                      widget.currentUser.phone!;
+
+                                  messageRequest = messageRequest.copyWith(
+                                      attaches: attaches,
+                                      content: content,
+                                      conversation_id: conversationID,
+                                      members: members,
+                                      sender_name: senderName,
+                                      sender_phone: senderPhone,
+                                      sent_date_time: DateTime.now().toLocal(),
+                                      is_read: false);
+                                  widget.stompManager.sendStompMessage(
+                                      "/app/chat",
+                                      JsonEncoder()
+                                          .convert(messageRequest.toJson()));
+                                  _textFieldController.clear();
+                                },
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
                     ),
-                  )),
-              //Show image preview
-              Visibility(
-                  visible: _showPreviewMedia,
-                  child: SizedBox(
-                      height: 150,
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                shrinkWrap: true,
-                                itemCount: mediaList.length,
-                                itemBuilder: (context, index) {
-                                  //Render Image item
+                  ),
+                ),
+                //Show image picker
+                Visibility(
+                    visible: _isOpenPicker,
+                    child: Container(
+                      height: 450,
+                      child: MediaPicker(
+                        mediaList: mediaList,
+                        onPicked: (selectedList) {
+                          setState(() {
+                            mediaList = selectedList;
+                            _isOpenPicker = false;
+                            _showPreviewMedia = true;
+                          });
+                        },
+                        onCancel: () => {
+                          setState(() {
+                            _isOpenPicker = false;
+                            if (mediaList.isNotEmpty) {
+                              _showPreviewMedia = true;
+                              if (sendMessageVisible == false) {
+                                sendMessageVisible = true;
+                              }
+                            }
+                          })
+                        },
+                        decoration: PickerDecoration(
+                          cancelIcon: const Icon(
+                            CupertinoIcons.clear,
+                            color: darkGreen,
+                          ),
+                          completeText: "Chọn",
+                          completeButtonStyle: const ButtonStyle(
+                              backgroundColor:
+                                  MaterialStatePropertyAll<Color>(lightGreen)),
+                          counterBuilder: (context, index) {
+                            if (index == null) return const SizedBox();
+                            return Align(
+                              alignment: Alignment.topRight,
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                    top: size.width * 0.001,
+                                    right: size.width * 0.01),
+                                child: Container(
+                                  decoration: const BoxDecoration(
+                                      color: lightGreen,
+                                      shape: BoxShape.circle),
+                                  padding: EdgeInsets.all(size.width * 0.015),
+                                  child: Text(
+                                    "$index",
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    )),
+                //Show image preview
+                Visibility(
+                    visible: _showPreviewMedia,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: SizedBox(
+                            height: size.height*0.25,
+                            child: GridView.builder(
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 3,
+                                  crossAxisSpacing: size.width*0.0001,
+                                  mainAxisSpacing: size.width*0.0001
+                              ),
+                              shrinkWrap: true,
+                              itemCount: mediaList.length+1,
+                              itemBuilder: (context, index) {
+                                if(index == 0) {
+                                  return IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _showPreviewMedia = false;
+                                          _isOpenPicker = true;
+                                          sendMessageVisible = false;
+                                        });
+                                      },
+                                      icon: const Icon(
+                                        Icons.add,
+                                        color: lightGreen,
+                                      ));
+                                } else {
                                   return Stack(
                                     children: [
                                       Container(
-                                        margin: EdgeInsets.all(size.width*0.025),
-                                        child: Container(
-                                          width: size.width*0.25,
-                                          height: size.width*0.25,
-                                          child: Image.memory(
-                                            mediaList[index].thumbnail!,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
+                                        margin: EdgeInsets.all(
+                                            size.width * 0.025),
+                                        child: SizedBox(
+                                            width: size.width * 0.25,
+                                            height: size.width * 0.25,
+                                            child: MediaPreviewItem(
+                                                mediaList[index-1],
+                                                size)),
                                       ),
                                       PositionedDirectional(
-                                          end: -size.width*0.025,
-                                          top: -size.width*0.025,
+                                          end: -size.width * 0.004,
+                                          top: -size.width * 0.015,
                                           child: IconButton(
-                                            icon: Icon(Icons.cancel, color: lightGreen,),
+                                            icon: const Icon(
+                                              Icons.cancel,
+                                              color: lightGreen,
+                                            ),
                                             onPressed: () {
                                               setState(() {
-                                                mediaList.removeAt(index);
-                                                if(mediaList.isEmpty) {
-                                                  _showPreviewMedia = false;
+                                                mediaList
+                                                    .removeAt(index-1);
+                                                if (mediaList
+                                                    .isEmpty) {
+                                                  _showPreviewMedia =
+                                                  false;
+                                                  if (sendMessageVisible ==
+                                                      true) {
+                                                    sendMessageVisible =
+                                                    false;
+                                                  }
                                                 }
                                               });
                                             },
-                                          )
-                                      )
+                                          ))
                                     ],
                                   );
-                                },
-                              ),
-                              IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _showPreviewMedia = false;
-                                      _isOpenPicker = true;
-                                    });
-                                  },
-                                  icon: const Icon(Icons.add, color: lightGreen,)
-                              )
-                            ],
+                                }
+                              },
+                            ),
                           ),
                         ),
-                      )))
-            ],
+                        Positioned(
+                          top: size.width*0.35,
+                          child: ElevatedButton(
+                            onPressed: () {
+
+                            },
+                            style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(lightGreen),
+                              fixedSize: MaterialStateProperty.all(
+                                  Size(size.width * 0.65, size.height * 0.06))
+                            ),
+                            child: Text("Gửi",
+                              style: TextStyle(
+                                  fontSize: size.height * 0.02,
+                                  fontWeight: FontWeight.normal,
+                                  color: Colors.white),
+                            ),
+                          ),
+                        )
+                      ],
+                    ))
+              ],
+            ),
           ),
         ),
       ),
@@ -542,6 +604,48 @@ class _ChatPageState extends State<ChatPage> {
       },
     );
   }
+}
+
+Widget MediaPreviewItem(Media mediaItem, Size size) {
+  if (mediaItem.mediaType.toString() == "MediaType.video") {
+    return Container(
+      color: Colors.black54,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Image.memory(
+            mediaItem.thumbnail!,
+          ),
+          Icon(
+            Icons.play_circle_outline,
+            size: size.width * 0.05,
+            color: Colors.white,
+          ),
+          Positioned.fill(
+              top: size.width * 0.2,
+              left: size.width * 0.15,
+              child: Text(
+                _printDuration(mediaItem.videoDuration),
+                style: const TextStyle(color: Colors.white),
+              ))
+        ],
+      ),
+    );
+  } else {
+    return Image.memory(
+      mediaItem.thumbnail!,
+      fit: BoxFit.cover,
+    );
+  }
+}
+
+String _printDuration(Duration? duration) {
+  if (duration == null) return "";
+  String twoDigits(int n) => n.toString().padLeft(2, "0");
+  String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+  String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+  if (duration.inHours == 0) return "$twoDigitMinutes:$twoDigitSeconds";
+  return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
 }
 
 class MessageBubble extends StatefulWidget {
