@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:ui';
 
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/model/Attach.dart';
 import 'package:fe_mobile_chat_app/model/ConversationResponse.dart';
@@ -9,14 +11,12 @@ import 'package:fe_mobile_chat_app/model/MessageRequest.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
 import 'package:fe_mobile_chat_app/services/function_service.dart';
 import 'package:fe_mobile_chat_app/services/serviceImpls/message_serviceImpl.dart';
+import 'package:file_picker/file_picker.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:gallery_picker/gallery_picker.dart';
 import 'package:media_picker_widget/media_picker_widget.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
-
 import '../services/stomp_manager.dart';
 
 class ChatPage extends StatefulWidget {
@@ -48,6 +48,10 @@ class _ChatPageState extends State<ChatPage> {
   var sendMessageVisible = false;
   List<Media> mediaList = [];
   final FocusNode _focusNode = FocusNode();
+
+  bool _showEmojiPicker = false;
+  bool _isOpenPicker = false;
+  bool _showPreviewMedia = false;
 
   @override
   void initState() {
@@ -96,20 +100,15 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  List<MediaFile> selectedMedias = [];
-  bool _isOpenPicker = false;
-  bool _showPreviewMedia = false;
-  late List<MediaFile>? medias;
+
   Future<void> pickMedia() async {
     setState(() {
       _focusNode.unfocus();
+      _showEmojiPicker = false;
       if (_isOpenPicker == false) {
         _isOpenPicker = true;
         if (_showPreviewMedia == true) {
           _showPreviewMedia = false;
-        }
-        if (sendMessageVisible == true) {
-          sendMessageVisible = false;
         }
       } else
         _isOpenPicker = false;
@@ -210,7 +209,7 @@ class _ChatPageState extends State<ChatPage> {
                             Icons.emoji_emotions,
                             color: lightGreen,
                           ),
-                          onPressed: () {},
+                          onPressed: pickEmoji,
                         ),
                         //Input type chat
                         Expanded(
@@ -270,7 +269,7 @@ class _ChatPageState extends State<ChatPage> {
                                   CupertinoIcons.paperclip,
                                   color: lightGreen,
                                 ),
-                                onPressed: () {},
+                                onPressed: pickFile,
                               ),
                             ),
                             //Send voice recorder button
@@ -489,7 +488,23 @@ class _ChatPageState extends State<ChatPage> {
                           ),
                         )
                       ],
-                    ))
+                    )),
+                //Show Emoji Picker
+                Visibility(
+                  visible: _showEmojiPicker,
+                  child: EmojiPicker(
+                    onEmojiSelected: (category, emoji) {},
+                    config: Config(
+                      height: size.height*0.35,
+                      checkPlatformCompatibility: true,
+                      swapCategoryAndBottomBar: false,
+                      skinToneConfig: const SkinToneConfig(),
+                      categoryViewConfig: const CategoryViewConfig(),
+                      bottomActionBarConfig: const BottomActionBarConfig(),
+                      searchViewConfig: const SearchViewConfig(),
+                    ),
+                  ),
+                )
               ],
             ),
           ),
@@ -603,6 +618,36 @@ class _ChatPageState extends State<ChatPage> {
             child: MessageBubbleItem(message, size, currentUser));
       },
     );
+  }
+
+  void pickFile() async {
+    setState(() {
+      _showEmojiPicker = false;
+      _showPreviewMedia = false;
+      _isOpenPicker = false;
+    });
+
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
+      type: FileType.custom,
+      allowedExtensions: ['doc', 'docx', 'pdf', 'txt', 'xml', 'ppt', 'pptx', 'xls', 'xlsm'],
+    );
+    if(result != null) {
+      List<File> files = result.paths.map((path) => File(path!)).toList();
+    }
+  }
+
+  void pickEmoji() {
+    setState(() {
+      if(_isOpenPicker == true) {
+        _isOpenPicker = false;
+      }
+      if(_showEmojiPicker == false) {
+        _showEmojiPicker = true;
+      } else {
+        _showEmojiPicker = false;
+      }
+    });
   }
 }
 
