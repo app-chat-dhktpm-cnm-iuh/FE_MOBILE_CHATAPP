@@ -1,6 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
-import 'dart:ui';
+import 'dart:typed_data';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fe_mobile_chat_app/constants.dart';
@@ -10,13 +9,15 @@ import 'package:fe_mobile_chat_app/model/Message.dart';
 import 'package:fe_mobile_chat_app/model/MessageRequest.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
 import 'package:fe_mobile_chat_app/services/function_service.dart';
-import 'package:fe_mobile_chat_app/services/serviceImpls/message_serviceImpl.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flick_video_player/flick_video_player.dart';
+
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:media_picker_widget/media_picker_widget.dart';
+import 'package:video_player/video_player.dart';
 import '../services/stomp_manager.dart';
 
 class ChatPage extends StatefulWidget {
@@ -40,6 +41,8 @@ class _ChatPageState extends State<ChatPage> {
   User currentUser = User();
   List<Message> messages = [];
   List<User> userMemberDetails = [];
+  List<Attach> attaches = [];
+  List<String> images = [];
   final ScrollController _scrollController = ScrollController();
   final ScrollController _scrollControllerListView = ScrollController();
   final TextEditingController _textFieldController = TextEditingController();
@@ -67,19 +70,23 @@ class _ChatPageState extends State<ChatPage> {
       (frame) {
         print("subscribe chat list");
         Map<String, dynamic> messageRequestJson = jsonDecode(frame.body!);
-        MessageRequest messageRequest =
-            MessageRequest.fromJson(messageRequestJson);
+        MessageRequest messageRequest = MessageRequest.fromJson(messageRequestJson);
+
         Message message = Message();
+
         message = message.copyWith(
+            message_id: messageRequest.message_id,
             sent_date_time: messageRequest.sent_date_time,
+            phoneDeleteList: messageRequest.phoneDeleteList,
+            sender_avatar_url: messageRequest.sender_avatar_url,
             sender_phone: messageRequest.sender_phone,
+            images: messageRequest.images,
             content: messageRequest.content,
             attaches: messageRequest.attaches,
             sender_name: messageRequest.sender_name,
             is_read: messageRequest.is_read);
         if (widget.conversationResponse.conversation?.conversation_id ==
             messageRequest.conversation_id) {
-          // widget.conversationResponse.conversation?.messages?.add(message);
           messages.add(message);
           _scrollToEnd();
           setState(() {});
@@ -110,8 +117,9 @@ class _ChatPageState extends State<ChatPage> {
         if (_showPreviewMedia == true) {
           _showPreviewMedia = false;
         }
-      } else
+      } else {
         _isOpenPicker = false;
+      }
     });
   }
 
@@ -196,6 +204,7 @@ class _ChatPageState extends State<ChatPage> {
             padding: EdgeInsets.only(top: size.width * 0.01),
             child: Column(
               children: [
+                //Render Mesage List
                 Expanded(child: _buildMessageList(size, messages)),
                 Align(
                   alignment: Alignment.bottomCenter,
@@ -213,7 +222,7 @@ class _ChatPageState extends State<ChatPage> {
                         ),
                         //Input type chat
                         Expanded(
-                          child: Container(
+                          child: SizedBox(
                             height: height,
                             child: SingleChildScrollView(
                               controller: _scrollController,
@@ -294,7 +303,8 @@ class _ChatPageState extends State<ChatPage> {
                                 onPressed: () {
                                   MessageRequest messageRequest =
                                       MessageRequest();
-                                  List<Attach> attaches = [];
+
+
                                   String content = _textFieldController.text;
                                   String conversationID = widget
                                       .conversationResponse
@@ -313,10 +323,13 @@ class _ChatPageState extends State<ChatPage> {
                                       content: content,
                                       conversation_id: conversationID,
                                       members: members,
+                                      images: images,
+                                      sender_avatar_url: currentUser.avatarUrl,
                                       sender_name: senderName,
                                       sender_phone: senderPhone,
                                       sent_date_time: DateTime.now().toLocal(),
                                       is_read: false);
+
                                   widget.stompManager.sendStompMessage(
                                       "/app/chat",
                                       JsonEncoder()
@@ -334,8 +347,8 @@ class _ChatPageState extends State<ChatPage> {
                 //Show image picker
                 Visibility(
                     visible: _isOpenPicker,
-                    child: Container(
-                      height: 450,
+                    child: SizedBox(
+                      height: size.height*0.4,
                       child: MediaPicker(
                         mediaList: mediaList,
                         onPicked: (selectedList) {
@@ -471,7 +484,49 @@ class _ChatPageState extends State<ChatPage> {
                         Positioned(
                           top: size.width*0.35,
                           child: ElevatedButton(
-                            onPressed: () {
+                            onPressed:  () async {
+                              for (var media in mediaList) {
+                                Uint8List? fileBytes = media.thumbnail;
+                                String nameFile = media.file!.path;
+                                Reference reference = FirebaseStorage.instance.ref().child('chatImages/$nameFile');
+                                reference.putData(fileBytes!);
+
+                                String imageUrl = await reference.getDownloadURL();
+                                images.add(imageUrl);
+
+                                MessageRequest messageRequest = MessageRequest();
+
+                                String conversationID = widget
+                                    .conversationResponse
+                                    .conversation!
+                                    .conversation_id!;
+
+                                List<String> members = widget
+                                    .conversationResponse
+                                    .conversation!
+                                    .members!;
+
+                                String senderName = widget.currentUser.name!;
+                                String senderPhone = widget.currentUser.phone!;
+
+                                messageRequest = messageRequest.copyWith(
+                                    attaches: attaches,
+                                    content: "",
+                                    conversation_id: conversationID,
+                                    images: images,
+                                    members: members,
+                                    sender_avatar_url: currentUser.avatarUrl,
+                                    sender_name: senderName,
+                                    sender_phone: senderPhone,
+                                    sent_date_time: DateTime.now().toLocal(),
+                                    is_read: false);
+
+                                widget.stompManager.sendStompMessage(
+                                    "/app/chat", const JsonEncoder().convert(messageRequest.toJson()));
+                                setState(() {
+                                  images.clear();
+                                });
+                              }
 
                             },
                             style: ButtonStyle(
@@ -549,8 +604,9 @@ class _ChatPageState extends State<ChatPage> {
                     message.sender_phone != null)
                   Text(getMemName(message.sender_phone!)!),
                 MessageBubble(
-                  message: message,
-                  currentUser: currentUser,
+                  message,
+                  currentUser,
+                  size
                 ),
               ],
             ),
@@ -566,8 +622,9 @@ class _ChatPageState extends State<ChatPage> {
                     message.sender_phone != null)
                   Text(getMemName(message.sender_phone!)!),
                 MessageBubble(
-                  message: message,
-                  currentUser: currentUser,
+                  message,
+                  currentUser,
+                  size
                 ),
               ],
             ),
@@ -584,8 +641,9 @@ class _ChatPageState extends State<ChatPage> {
             if (message.sender_phone != currentUser.phone)
               creatAva(message, size)!,
             MessageBubble(
-              message: message,
-              currentUser: currentUser,
+              message,
+              currentUser,
+              size
             ),
           ],
         );
@@ -597,8 +655,9 @@ class _ChatPageState extends State<ChatPage> {
                 message.sender_phone != null)
               creatAva(message, size)!,
             MessageBubble(
-              message: message,
-              currentUser: currentUser,
+              message,
+              currentUser,
+              size
             ),
           ],
         );
@@ -633,7 +692,50 @@ class _ChatPageState extends State<ChatPage> {
       allowedExtensions: ['doc', 'docx', 'pdf', 'txt', 'xml', 'ppt', 'pptx', 'xls', 'xlsm'],
     );
     if(result != null) {
-      List<File> files = result.paths.map((path) => File(path!)).toList();
+      List<PlatformFile> files =  result.files;
+      for (var file in files) {
+        Uint8List? fileBytes = file.bytes;
+        String nameFile = file.name;
+        Reference reference = await FirebaseStorage.instance.ref().child('chatAttachments/${nameFile}');
+        reference.putData(fileBytes!);
+
+        String filePath = await reference.getDownloadURL();
+        Attach attach = Attach(url: filePath, name: nameFile);
+        attaches.add(attach);
+
+        MessageRequest messageRequest = MessageRequest();
+
+        String conversationID = widget
+            .conversationResponse
+            .conversation!
+            .conversation_id!;
+
+        List<String> members = widget
+            .conversationResponse
+            .conversation!
+            .members!;
+
+        String senderName = widget.currentUser.name!;
+        String senderPhone = widget.currentUser.phone!;
+
+        messageRequest = messageRequest.copyWith(
+            attaches: attaches,
+            content: "",
+            conversation_id: conversationID,
+            images: images,
+            members: members,
+            sender_avatar_url: currentUser.avatarUrl,
+            sender_name: senderName,
+            sender_phone: senderPhone,
+            sent_date_time: DateTime.now().toLocal(),
+            is_read: false);
+        widget.stompManager.sendStompMessage(
+            "/app/chat", const JsonEncoder().convert(messageRequest.toJson()));
+      }
+
+      setState(() {
+        attaches.clear();
+      });
     }
   }
 
@@ -693,42 +795,34 @@ String _printDuration(Duration? duration) {
   return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
 }
 
-class MessageBubble extends StatefulWidget {
-  final Message message;
-  final User currentUser;
-  const MessageBubble(
-      {super.key, required this.message, required this.currentUser});
+Widget MessageBubble(Message message, User currentUser, Size size) {
+  String? sender_phone = message.sender_phone;
+  String? current_phone = currentUser.phone;
 
-  @override
-  State<MessageBubble> createState() => _MessageBubbleState();
-}
-
-class _MessageBubbleState extends State<MessageBubble> {
   Color backgroundTextColor = Colors.lightGreen;
   Color textColor = Colors.black;
+  var images = message.images;
+  var attaches = message.attaches;
+  String? content = message.content;
+  var sent_date_time = message.sent_date_time;
 
-  @override
-  Widget build(BuildContext context) {
-    String? sender_phone = widget.message.sender_phone;
-    String? current_phone = widget.currentUser.phone;
+  var alignment = (sender_phone == current_phone)
+      ? Alignment.centerRight
+      : Alignment.centerLeft;
 
-    final size = MediaQuery.sizeOf(context);
-    var alignment = (sender_phone == current_phone)
-        ? Alignment.centerRight
-        : Alignment.centerLeft;
+  backgroundTextColor = (sender_phone == current_phone)
+      ? backgroundTextColor = lightGreen
+      : backgroundTextColor = Colors.white;
 
-    backgroundTextColor = (sender_phone == current_phone)
-        ? backgroundTextColor = lightGreen
-        : backgroundTextColor = Colors.white;
+  textColor = (sender_phone == current_phone)
+      ? textColor = Colors.white
+      : textColor = Colors.black;
 
-    textColor = (sender_phone == current_phone)
-        ? textColor = Colors.white
-        : textColor = Colors.black;
-
-    var textAlign = (sender_phone == current_phone)
-        ? CrossAxisAlignment.end
-        : CrossAxisAlignment.start;
-    if (sender_phone != null) {
+  var textAlign = (sender_phone == current_phone)
+      ? CrossAxisAlignment.end
+      : CrossAxisAlignment.start;
+  if (sender_phone != null) {
+    if(content != null) {
       return Align(
         alignment: alignment,
         child: Container(
@@ -741,47 +835,112 @@ class _MessageBubbleState extends State<MessageBubble> {
             child: Column(
               crossAxisAlignment: textAlign,
               children: [
-                if (widget.message.content != null)
-                  Text(
-                    widget.message.content ?? "",
-                    style: TextStyle(
-                        fontSize: size.width * 0.04, color: textColor),
-                  ),
-                if (widget.message.images!.isNotEmpty)
-                  // ListView.builder(
-                  //   scrollDirection: Axis.vertical,
-                  //   shrinkWrap: true,
-                  //   itemCount: widget.message.images!.length,
-                  //   itemBuilder: (context, index) {
-                  //     final imageUrl = widget.message.images?[index];
-                  //     return Image.network(imageUrl!, fit: BoxFit.contain,);
-                  //   },)
-                  Wrap(
-                    spacing: 8.0,
-                    runSpacing: 8.0,
-                    children: [
-                      for (var imgUrl in widget.message.images!)
-                        Image.network(
-                          imgUrl,
-                          fit: BoxFit.cover,
-                        )
-                    ],
-                  ),
+                Text( content,
+                  style: TextStyle(
+                      fontSize: size.width * 0.04, color: textColor),
+                ),
                 Text(
-                  "${widget.message.sent_date_time?.hour}:${widget.message.sent_date_time?.minute}",
+                  "${sent_date_time!.hour}:${sent_date_time.minute}",
                   style:
-                      TextStyle(fontSize: size.width * 0.04, color: textColor),
+                  TextStyle(fontSize: size.width * 0.04, color: textColor),
                 )
               ],
             )),
       );
-    } else {
+    } else if(images!.isNotEmpty) {
+      return Align(
+        alignment: alignment,
+        child: Column(
+            children: [
+              for(var imgUrl in images)
+                FirebaseStorage.instance.refFromURL(imgUrl).fullPath.split("/").first == "chatImages"
+                    ? Container(
+                    constraints: BoxConstraints(maxWidth: size.width * 0.66),
+                    padding: EdgeInsets.all(size.width * 0.02),
+                    margin: EdgeInsets.all(size.width * 0.01),
+                    decoration: BoxDecoration(
+                        color: backgroundTextColor,
+                        borderRadius: BorderRadius.circular(size.width * 0.03)),
+                    child: Column(
+                      crossAxisAlignment: textAlign,
+                      children: [
+                        Wrap(
+                          spacing: 8.0,
+                          runSpacing: 8.0,
+                          children: [
+                            Image.network(
+                              imgUrl,
+                              fit: BoxFit.cover,
+                            )
+                          ],
+                        ),
+                        Text(
+                          "${sent_date_time!.hour}:${sent_date_time.minute}",
+                          style: TextStyle(
+                              fontSize: size.width * 0.04,
+                              color: textColor
+                          ),
+                        )
+                      ],
+                    ))
+                    : Container(
+                    constraints: BoxConstraints(maxWidth: size.width * 0.66),
+                    padding: EdgeInsets.all(size.width * 0.02),
+                    margin: EdgeInsets.all(size.width * 0.01),
+                    decoration: BoxDecoration(
+                        color: backgroundTextColor,
+                        borderRadius: BorderRadius.circular(size.width * 0.03)),
+                    child: Column(
+                      crossAxisAlignment: textAlign,
+                      children: [
+                        Wrap(
+                          spacing: 8.0,
+                          runSpacing: 8.0,
+                          children: [
+                            VideoPlayerWidget(imgUrl)
+                          ],
+                        ),
+                        Text(
+                          "${sent_date_time!.hour}:${sent_date_time.minute}",
+                          style: TextStyle(
+                              fontSize: size.width * 0.04,
+                              color: textColor
+                          ),
+                        )
+                      ],
+                    ))
+            ]
+        ),
+      );
+    } else if(attaches!.isNotEmpty) {
       return Align(
         alignment: Alignment.center,
-        child: Text(widget.message.content ?? "",
+        child: Text(message.content ?? "",
             style:
-                TextStyle(fontSize: size.width * 0.04, color: Colors.blueGrey)),
+            TextStyle(fontSize: size.width * 0.04, color: Colors.blueGrey)),
       );
     }
+  } else {
+    return Align(
+      alignment: Alignment.center,
+      child: Text(content ?? "",
+          style:
+          TextStyle(fontSize: size.width * 0.04, color: Colors.blueGrey)),
+    );
   }
+  return Text("Hello");
+}
+
+Widget VideoPlayerWidget(String imgUrl) {
+  late VideoPlayerController _videoController;
+  late FlickManager flickManager;
+
+  _videoController = VideoPlayerController.networkUrl(Uri.parse(imgUrl));
+  flickManager = FlickManager(videoPlayerController: _videoController);
+
+  return Container(
+    child: FlickVideoPlayer(
+      flickManager: flickManager,
+    ),
+  );
 }

@@ -47,6 +47,9 @@ dependencies:
   media_picker_widget: ^1.0.8-pre.1
   file_picker: ^8.0.1
   emoji_picker_flutter: ^2.0.0
+  firebase_storage: ^11.7.5
+  video_player: ^2.8.6
+  flick_video_player: ^0.8.0
 
 dev_dependencies:
   flutter_test:
