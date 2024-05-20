@@ -125,9 +125,9 @@ class _ChatsListWidgetState extends State<ChatsListWidget> {
                   }
                 } else if(lastMessage.attaches!.isNotEmpty) {
                   if(lastMessage.sender_phone != currentUser.phone) {
-                    subtitle = "${lastMessage.sender_name}: [Đã gửi ${lastMessage.images!.length} tập tin]";
+                    subtitle = "${lastMessage.sender_name}: [Đã gửi ${lastMessage.attaches!.length} tập tin]";
                   } else {
-                    subtitle = "Bạn: [Đã gửi ${lastMessage.images!.length} tập tin]";
+                    subtitle = "Bạn: [Đã gửi ${lastMessage.attaches!.length} tập tin]";
                   }
                 } else {
                   if(lastMessage.sender_phone != currentUser.phone) {

@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fe_mobile_chat_app/constants.dart';
@@ -13,9 +15,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flick_video_player/flick_video_player.dart';
 
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:media_picker_widget/media_picker_widget.dart';
 import 'package:video_player/video_player.dart';
 import '../services/stomp_manager.dart';
@@ -63,6 +66,8 @@ class _ChatPageState extends State<ChatPage> {
     currentUser = widget.currentUser;
     messages = widget.conversationResponse.conversation!.messages!;
     userMemberDetails = widget.conversationResponse.memberDetails!;
+
+
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToEnd());
     //Update new message into list message of the conversation
     widget.stompManager.subscribeToDestination(
@@ -70,7 +75,8 @@ class _ChatPageState extends State<ChatPage> {
       (frame) {
         print("subscribe chat list");
         Map<String, dynamic> messageRequestJson = jsonDecode(frame.body!);
-        MessageRequest messageRequest = MessageRequest.fromJson(messageRequestJson);
+        MessageRequest messageRequest =
+            MessageRequest.fromJson(messageRequestJson);
 
         Message message = Message();
 
@@ -84,16 +90,15 @@ class _ChatPageState extends State<ChatPage> {
             content: messageRequest.content,
             attaches: messageRequest.attaches,
             sender_name: messageRequest.sender_name,
-            is_read: messageRequest.is_read);
+            is_read: messageRequest.is_read,
+            is_notification: messageRequest.is_notification);
+
         if (widget.conversationResponse.conversation?.conversation_id ==
             messageRequest.conversation_id) {
           messages.add(message);
           _scrollToEnd();
           setState(() {});
-        }
-
-        print(messageRequest.toString());
-      },
+        }},
     );
   }
 
@@ -106,7 +111,6 @@ class _ChatPageState extends State<ChatPage> {
       curve: Curves.easeInOut,
     );
   }
-
 
   Future<void> pickMedia() async {
     setState(() {
@@ -133,6 +137,18 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     var height = size.height * 0.05;
+
+    String conversationID = widget
+        .conversationResponse
+        .conversation!
+        .conversation_id!;
+    List<String> members = widget
+        .conversationResponse
+        .conversation!
+        .members!;
+    String senderName = widget.currentUser.name!;
+    String senderPhone =
+    widget.currentUser.phone!;
 
     void handleChangeIcon() {
       if (_textFieldController.text == "") {
@@ -304,19 +320,9 @@ class _ChatPageState extends State<ChatPage> {
                                   MessageRequest messageRequest =
                                       MessageRequest();
 
-
                                   String content = _textFieldController.text;
-                                  String conversationID = widget
-                                      .conversationResponse
-                                      .conversation!
-                                      .conversation_id!;
-                                  List<String> members = widget
-                                      .conversationResponse
-                                      .conversation!
-                                      .members!;
-                                  String senderName = widget.currentUser.name!;
-                                  String senderPhone =
-                                      widget.currentUser.phone!;
+
+
 
                                   messageRequest = messageRequest.copyWith(
                                       attaches: attaches,
@@ -328,7 +334,8 @@ class _ChatPageState extends State<ChatPage> {
                                       sender_name: senderName,
                                       sender_phone: senderPhone,
                                       sent_date_time: DateTime.now().toLocal(),
-                                      is_read: false);
+                                      is_read: false,
+                                      is_notification: false);
 
                                   widget.stompManager.sendStompMessage(
                                       "/app/chat",
@@ -348,7 +355,7 @@ class _ChatPageState extends State<ChatPage> {
                 Visibility(
                     visible: _isOpenPicker,
                     child: SizedBox(
-                      height: size.height*0.4,
+                      height: size.height * 0.4,
                       child: MediaPicker(
                         mediaList: mediaList,
                         onPicked: (selectedList) {
@@ -413,17 +420,17 @@ class _ChatPageState extends State<ChatPage> {
                         Align(
                           alignment: Alignment.centerLeft,
                           child: SizedBox(
-                            height: size.height*0.25,
+                            height: size.height * 0.25,
                             child: GridView.builder(
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 3,
-                                  crossAxisSpacing: size.width*0.0001,
-                                  mainAxisSpacing: size.width*0.0001
-                              ),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 3,
+                                      crossAxisSpacing: size.width * 0.0001,
+                                      mainAxisSpacing: size.width * 0.0001),
                               shrinkWrap: true,
-                              itemCount: mediaList.length+1,
+                              itemCount: mediaList.length + 1,
                               itemBuilder: (context, index) {
-                                if(index == 0) {
+                                if (index == 0) {
                                   return IconButton(
                                       onPressed: () {
                                         setState(() {
@@ -440,14 +447,13 @@ class _ChatPageState extends State<ChatPage> {
                                   return Stack(
                                     children: [
                                       Container(
-                                        margin: EdgeInsets.all(
-                                            size.width * 0.025),
+                                        margin:
+                                            EdgeInsets.all(size.width * 0.025),
                                         child: SizedBox(
                                             width: size.width * 0.25,
                                             height: size.width * 0.25,
                                             child: MediaPreviewItem(
-                                                mediaList[index-1],
-                                                size)),
+                                                mediaList[index - 1], size)),
                                       ),
                                       PositionedDirectional(
                                           end: -size.width * 0.004,
@@ -459,16 +465,11 @@ class _ChatPageState extends State<ChatPage> {
                                             ),
                                             onPressed: () {
                                               setState(() {
-                                                mediaList
-                                                    .removeAt(index-1);
-                                                if (mediaList
-                                                    .isEmpty) {
-                                                  _showPreviewMedia =
-                                                  false;
-                                                  if (sendMessageVisible ==
-                                                      true) {
-                                                    sendMessageVisible =
-                                                    false;
+                                                mediaList.removeAt(index - 1);
+                                                if (mediaList.isEmpty) {
+                                                  _showPreviewMedia = false;
+                                                  if (sendMessageVisible == true) {
+                                                    sendMessageVisible = false;
                                                   }
                                                 }
                                               });
@@ -482,59 +483,62 @@ class _ChatPageState extends State<ChatPage> {
                           ),
                         ),
                         Positioned(
-                          top: size.width*0.35,
+                          top: size.width * 0.35,
                           child: ElevatedButton(
-                            onPressed:  () async {
+                            onPressed: () async {
                               for (var media in mediaList) {
-                                Uint8List? fileBytes = media.thumbnail;
-                                String nameFile = media.file!.path;
-                                Reference reference = FirebaseStorage.instance.ref().child('chatImages/$nameFile');
-                                reference.putData(fileBytes!);
+                                File? fileBytes = media.file;
+                                String nameFile = media.file!.path.split('/').last;
+                                Reference reference;
+                                if(media.mediaType == MediaType.image) {
+                                  reference = FirebaseStorage.instance
+                                      .ref().child('chatImages/$nameFile');
 
-                                String imageUrl = await reference.getDownloadURL();
+                                  await reference.putFile(fileBytes!);
+
+                                } else {
+                                  reference = FirebaseStorage.instance
+                                      .ref().child('chatVideos/$nameFile');
+
+                                  await reference.putFile(fileBytes!);
+                                }
+
+                                
+                                String imageUrl =
+                                    await reference.getDownloadURL();
                                 images.add(imageUrl);
-
-                                MessageRequest messageRequest = MessageRequest();
-
-                                String conversationID = widget
-                                    .conversationResponse
-                                    .conversation!
-                                    .conversation_id!;
-
-                                List<String> members = widget
-                                    .conversationResponse
-                                    .conversation!
-                                    .members!;
-
-                                String senderName = widget.currentUser.name!;
-                                String senderPhone = widget.currentUser.phone!;
-
-                                messageRequest = messageRequest.copyWith(
-                                    attaches: attaches,
-                                    content: "",
-                                    conversation_id: conversationID,
-                                    images: images,
-                                    members: members,
-                                    sender_avatar_url: currentUser.avatarUrl,
-                                    sender_name: senderName,
-                                    sender_phone: senderPhone,
-                                    sent_date_time: DateTime.now().toLocal(),
-                                    is_read: false);
-
-                                widget.stompManager.sendStompMessage(
-                                    "/app/chat", const JsonEncoder().convert(messageRequest.toJson()));
-                                setState(() {
-                                  images.clear();
-                                });
                               }
 
+                              MessageRequest messageRequest =
+                              MessageRequest();
+
+                              messageRequest = messageRequest.copyWith(
+                                  attaches: attaches,
+                                  conversation_id: conversationID,
+                                  images: images,
+                                  members: members,
+                                  sender_avatar_url: currentUser.avatarUrl,
+                                  sender_name: senderName,
+                                  sender_phone: senderPhone,
+                                  sent_date_time: DateTime.now().toLocal(),
+                                  is_read: false,
+                                  is_notification: false);
+                              widget.stompManager.sendStompMessage(
+                                  "/app/chat",
+                                  const JsonEncoder()
+                                      .convert(messageRequest.toJson()));
+                              setState(() {
+                                images.clear();
+                                _showPreviewMedia = false;
+                              });
                             },
                             style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(lightGreen),
-                              fixedSize: MaterialStateProperty.all(
-                                  Size(size.width * 0.65, size.height * 0.06))
-                            ),
-                            child: Text("Gửi",
+                                backgroundColor:
+                                    MaterialStateProperty.all(lightGreen),
+                                fixedSize: MaterialStateProperty.all(Size(
+                                    size.width * 0.65, size.height * 0.06))),
+                            child: Text(
+                              "Gửi",
                               style: TextStyle(
                                   fontSize: size.height * 0.02,
                                   fontWeight: FontWeight.normal,
@@ -550,7 +554,7 @@ class _ChatPageState extends State<ChatPage> {
                   child: EmojiPicker(
                     onEmojiSelected: (category, emoji) {},
                     config: Config(
-                      height: size.height*0.35,
+                      height: size.height * 0.35,
                       checkPlatformCompatibility: true,
                       swapCategoryAndBottomBar: false,
                       skinToneConfig: const SkinToneConfig(),
@@ -603,11 +607,7 @@ class _ChatPageState extends State<ChatPage> {
                 if (message.sender_phone != currentUser.phone &&
                     message.sender_phone != null)
                   Text(getMemName(message.sender_phone!)!),
-                MessageBubble(
-                  message,
-                  currentUser,
-                  size
-                ),
+                MessageBubble(message, currentUser, size),
               ],
             ),
           ],
@@ -621,11 +621,7 @@ class _ChatPageState extends State<ChatPage> {
                 if (message.sender_phone != currentUser.phone &&
                     message.sender_phone != null)
                   Text(getMemName(message.sender_phone!)!),
-                MessageBubble(
-                  message,
-                  currentUser,
-                  size
-                ),
+                MessageBubble(message, currentUser, size),
               ],
             ),
           ],
@@ -640,11 +636,7 @@ class _ChatPageState extends State<ChatPage> {
           children: [
             if (message.sender_phone != currentUser.phone)
               creatAva(message, size)!,
-            MessageBubble(
-              message,
-              currentUser,
-              size
-            ),
+            MessageBubble(message, currentUser, size),
           ],
         );
       } else {
@@ -654,11 +646,7 @@ class _ChatPageState extends State<ChatPage> {
             if (message.sender_phone != currentUser.phone &&
                 message.sender_phone != null)
               creatAva(message, size)!,
-            MessageBubble(
-              message,
-              currentUser,
-              size
-            ),
+            MessageBubble(message, currentUser, size),
           ],
         );
       }
@@ -689,49 +677,61 @@ class _ChatPageState extends State<ChatPage> {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       allowMultiple: true,
       type: FileType.custom,
-      allowedExtensions: ['doc', 'docx', 'pdf', 'txt', 'xml', 'ppt', 'pptx', 'xls', 'xlsm'],
+      allowedExtensions: [
+        'doc',
+        'docx',
+        'pdf',
+        'txt',
+        'xml',
+        'ppt',
+        'pptx',
+        'xls',
+        'xlsm',
+        'rar',
+        'zip',
+      ],
     );
-    if(result != null) {
-      List<PlatformFile> files =  result.files;
+    if (result != null) {
+      List<PlatformFile> files = result.files;
+      String conversationID =
+      widget.conversationResponse.conversation!.conversation_id!;
+
+      List<String> members =
+      widget.conversationResponse.conversation!.members!;
+
+      String senderName = widget.currentUser.name!;
+      String senderPhone = widget.currentUser.phone!;
+
       for (var file in files) {
-        Uint8List? fileBytes = file.bytes;
+        File fileData = File(file.path!);
+
         String nameFile = file.name;
-        Reference reference = await FirebaseStorage.instance.ref().child('chatAttachments/${nameFile}');
-        reference.putData(fileBytes!);
+        Reference reference = FirebaseStorage.instance
+            .ref()
+            .child('chatAttachments/$nameFile');
+
+        await reference.putFile(fileData);
 
         String filePath = await reference.getDownloadURL();
         Attach attach = Attach(url: filePath, name: nameFile);
         attaches.add(attach);
-
-        MessageRequest messageRequest = MessageRequest();
-
-        String conversationID = widget
-            .conversationResponse
-            .conversation!
-            .conversation_id!;
-
-        List<String> members = widget
-            .conversationResponse
-            .conversation!
-            .members!;
-
-        String senderName = widget.currentUser.name!;
-        String senderPhone = widget.currentUser.phone!;
-
-        messageRequest = messageRequest.copyWith(
-            attaches: attaches,
-            content: "",
-            conversation_id: conversationID,
-            images: images,
-            members: members,
-            sender_avatar_url: currentUser.avatarUrl,
-            sender_name: senderName,
-            sender_phone: senderPhone,
-            sent_date_time: DateTime.now().toLocal(),
-            is_read: false);
-        widget.stompManager.sendStompMessage(
-            "/app/chat", const JsonEncoder().convert(messageRequest.toJson()));
       }
+
+      MessageRequest messageRequest = MessageRequest();
+
+      messageRequest = messageRequest.copyWith(
+          attaches: attaches,
+          conversation_id: conversationID,
+          images: images,
+          members: members,
+          sender_avatar_url: currentUser.avatarUrl,
+          sender_name: senderName,
+          sender_phone: senderPhone,
+          sent_date_time: DateTime.now().toLocal(),
+          is_read: false,
+          is_notification: false);
+      widget.stompManager.sendStompMessage(
+          "/app/chat", const JsonEncoder().convert(messageRequest.toJson()));
 
       setState(() {
         attaches.clear();
@@ -741,10 +741,10 @@ class _ChatPageState extends State<ChatPage> {
 
   void pickEmoji() {
     setState(() {
-      if(_isOpenPicker == true) {
+      if (_isOpenPicker == true) {
         _isOpenPicker = false;
       }
-      if(_showEmojiPicker == false) {
+      if (_showEmojiPicker == false) {
         _showEmojiPicker = true;
       } else {
         _showEmojiPicker = false;
@@ -822,7 +822,7 @@ Widget MessageBubble(Message message, User currentUser, Size size) {
       ? CrossAxisAlignment.end
       : CrossAxisAlignment.start;
   if (sender_phone != null) {
-    if(content != null) {
+    if (content != null) {
       return Align(
         alignment: alignment,
         child: Container(
@@ -835,26 +835,30 @@ Widget MessageBubble(Message message, User currentUser, Size size) {
             child: Column(
               crossAxisAlignment: textAlign,
               children: [
-                Text( content,
-                  style: TextStyle(
-                      fontSize: size.width * 0.04, color: textColor),
+                Text(
+                  content,
+                  style:
+                      TextStyle(fontSize: size.width * 0.04, color: textColor),
                 ),
                 Text(
                   "${sent_date_time!.hour}:${sent_date_time.minute}",
                   style:
-                  TextStyle(fontSize: size.width * 0.04, color: textColor),
+                      TextStyle(fontSize: size.width * 0.04, color: textColor),
                 )
               ],
             )),
       );
-    } else if(images!.isNotEmpty) {
+    } else if (images!.isNotEmpty) {
       return Align(
         alignment: alignment,
-        child: Column(
-            children: [
-              for(var imgUrl in images)
-                FirebaseStorage.instance.refFromURL(imgUrl).fullPath.split("/").first == "chatImages"
-                    ? Container(
+        child: Column(children: [
+          for (var imgUrl in images)
+            FirebaseStorage.instance
+                        .refFromURL(imgUrl)
+                        .fullPath
+                        .split("/")
+                        .first == "chatImages"
+                ? Container(
                     constraints: BoxConstraints(maxWidth: size.width * 0.66),
                     padding: EdgeInsets.all(size.width * 0.02),
                     margin: EdgeInsets.all(size.width * 0.01),
@@ -877,13 +881,11 @@ Widget MessageBubble(Message message, User currentUser, Size size) {
                         Text(
                           "${sent_date_time!.hour}:${sent_date_time.minute}",
                           style: TextStyle(
-                              fontSize: size.width * 0.04,
-                              color: textColor
-                          ),
+                              fontSize: size.width * 0.04, color: textColor),
                         )
                       ],
                     ))
-                    : Container(
+                : Container(
                     constraints: BoxConstraints(maxWidth: size.width * 0.66),
                     padding: EdgeInsets.all(size.width * 0.02),
                     margin: EdgeInsets.all(size.width * 0.01),
@@ -896,28 +898,60 @@ Widget MessageBubble(Message message, User currentUser, Size size) {
                         Wrap(
                           spacing: 8.0,
                           runSpacing: 8.0,
-                          children: [
-                            VideoPlayerWidget(imgUrl)
-                          ],
+                          children: [videoPlayerWidget(imgUrl)],
                         ),
                         Text(
                           "${sent_date_time!.hour}:${sent_date_time.minute}",
                           style: TextStyle(
-                              fontSize: size.width * 0.04,
-                              color: textColor
-                          ),
+                              fontSize: size.width * 0.04, color: textColor),
                         )
                       ],
                     ))
-            ]
-        ),
+        ]),
       );
-    } else if(attaches!.isNotEmpty) {
-      return Align(
-        alignment: Alignment.center,
-        child: Text(message.content ?? "",
-            style:
-            TextStyle(fontSize: size.width * 0.04, color: Colors.blueGrey)),
+    } else if (attaches!.isNotEmpty) {
+      return Column(
+        children: [
+          for (Attach attach in attaches)
+            Container(
+                constraints: BoxConstraints(maxWidth: size.width * 0.66),
+                padding: EdgeInsets.all(size.width * 0.02),
+                margin: EdgeInsets.all(size.width * 0.01),
+                decoration: BoxDecoration(
+                    color: backgroundTextColor,
+                    borderRadius: BorderRadius.circular(size.width * 0.03)),
+                child: Column(
+                  children: [
+                    Row(
+                        children: [
+                      Expanded(
+                        child: SvgPicture.asset(
+                          "assets/images/${getTypeFile(attach.name)}-icon.svg",
+                          height: size.width*0.15,
+                          width: size.width*0.15,
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(attach.name!, style: TextStyle(fontWeight: FontWeight.bold, fontSize: size.width*0.035),),
+                            InkWell(
+                              onTap: () {},
+                              child: Text("Nhấn để tải xuống", style: TextStyle(fontSize: size.width*0.035),),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ]),
+                    Text(
+                      "${sent_date_time!.hour}:${sent_date_time.minute}",
+                      style: TextStyle(
+                          fontSize: size.width * 0.04, color: textColor),
+                    )
+                  ],
+                )),
+        ],
       );
     }
   } else {
@@ -925,22 +959,36 @@ Widget MessageBubble(Message message, User currentUser, Size size) {
       alignment: Alignment.center,
       child: Text(content ?? "",
           style:
-          TextStyle(fontSize: size.width * 0.04, color: Colors.blueGrey)),
+              TextStyle(fontSize: size.width * 0.04, color: Colors.blueGrey)),
     );
   }
   return Text("Hello");
 }
 
-Widget VideoPlayerWidget(String imgUrl) {
-  late VideoPlayerController _videoController;
+String getTypeFile(String? nameFile) {
+  String fileType = nameFile!.split('.').last;
+  if(fileType == "png" || fileType == "svg" || fileType == "jpeg" || fileType == "jpg" || fileType == "gif") {
+    return "picture";
+  } else if(fileType == "docx") {
+    return 'doc';
+  } else if(fileType == "pptx") {
+    return 'ppt';
+  } else if (fileType == "xlsm") {
+    return 'xls';
+  } else if (fileType == "zip") {
+    return 'rar';
+  }
+  return fileType;
+}
+
+Widget videoPlayerWidget(String imgUrl) {
+  late VideoPlayerController videoController;
   late FlickManager flickManager;
 
-  _videoController = VideoPlayerController.networkUrl(Uri.parse(imgUrl));
-  flickManager = FlickManager(videoPlayerController: _videoController);
+  videoController = VideoPlayerController.contentUri(Uri.parse(imgUrl));
+  flickManager = FlickManager(videoPlayerController: videoController);
 
-  return Container(
-    child: FlickVideoPlayer(
-      flickManager: flickManager,
-    ),
+  return FlickVideoPlayer(
+    flickManager: flickManager,
   );
 }

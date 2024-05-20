@@ -13,6 +13,7 @@ class MessageRequest {
   List<String>? phoneDeleteList;
   DateTime? sent_date_time;
   bool? is_read;
+  bool? is_notification;
 
   MessageRequest(
       {this.conversation_id,
@@ -26,7 +27,8 @@ class MessageRequest {
       this.sender_avatar_url,
       this.phoneDeleteList,
       this.sent_date_time,
-      this.is_read});
+      this.is_read,
+      this.is_notification});
 
   MessageRequest copyWith(
           {String? conversation_id,
@@ -40,7 +42,8 @@ class MessageRequest {
           String? sender_avatar_url,
           List<String>? phoneDeleteList,
           DateTime? sent_date_time,
-          bool? is_read}) =>
+          bool? is_read,
+          bool? is_notification}) =>
       MessageRequest(
           conversation_id: conversation_id ?? this.conversation_id,
           message_id: message_id ?? this.message_id,
@@ -53,7 +56,8 @@ class MessageRequest {
           sender_avatar_url: sender_avatar_url ?? this.sender_avatar_url,
           phoneDeleteList: phoneDeleteList ?? this.phoneDeleteList,
           sent_date_time: sent_date_time ?? this.sent_date_time,
-          is_read: is_read ?? this.is_read);
+          is_read: is_read ?? this.is_read,
+          is_notification: is_notification ?? this.is_notification);
 
   MessageRequest.fromJson(Map<String, dynamic> json) {
     conversation_id = json['conversation_id'];
@@ -87,6 +91,7 @@ class MessageRequest {
     sent_date_time =
         DateTime.fromMillisecondsSinceEpoch(json['sent_date_time']);
     is_read = json['_read'];
+    is_notification = json['_notification'];
   }
 
   Map<String, dynamic> toJson() {
@@ -104,11 +109,12 @@ class MessageRequest {
 
     data['sent_date_time'] = sent_date_time?.toIso8601String();
     data['_read'] = is_read;
+    data['_notification'] = is_notification;
     return data;
   }
 
   @override
   String toString() {
-    return 'MessageRequest{conversation_id: $conversation_id, members: $members, content: $content, sender_name: $sender_name, images: $images, attaches: $attaches, sender_phone: $sender_phone, sender_avatar_url: $sender_avatar_url, phoneDeleteList: $phoneDeleteList, sent_date_time: $sent_date_time, is_read: $is_read}';
+    return 'MessageRequest{conversation_id: $conversation_id, message_id: $message_id, members: $members, content: $content, sender_name: $sender_name, images: $images, attaches: $attaches, sender_phone: $sender_phone, sender_avatar_url: $sender_avatar_url, phoneDeleteList: $phoneDeleteList, sent_date_time: $sent_date_time, is_read: $is_read, is_notification: $is_notification}';
   }
 }
