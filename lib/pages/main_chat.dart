@@ -10,6 +10,7 @@ import 'package:fe_mobile_chat_app/model/UserToken.dart';
 import 'package:fe_mobile_chat_app/pages/chat_list_widget.dart';
 import 'package:fe_mobile_chat_app/pages/endrawer_main_chat.dart';
 import 'package:fe_mobile_chat_app/pages/friend_list_widget.dart';
+import 'package:fe_mobile_chat_app/pages/search_friend_page.dart';
 import 'package:fe_mobile_chat_app/services/function_service.dart';
 import 'package:fe_mobile_chat_app/services/serviceImpls/conversation_serviceImpl.dart';
 import 'package:fe_mobile_chat_app/services/serviceImpls/friend_serviceImpl.dart';
@@ -18,6 +19,7 @@ import 'package:fe_mobile_chat_app/services/stomp_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:page_transition/page_transition.dart';
 
 import '../model/Conversation.dart';
 
@@ -43,14 +45,6 @@ class _MainChatState extends State<MainChat> {
   @override
   void initState() {
     super.initState();
-    // widget.stompManager.subscribeToDestination("/topic/public").listen((frame) {
-    //   print("subscribe main chat");
-    //   List<String> values = [];
-    //   final body = frame.body;
-    //   values.add(body!);
-    //   print("Subscribe value topic: ${values}");
-    // });
-
     widget.stompManager.subscribeToDestination("/topic/public", (frame) {
       print("subscribe main chat");
       print(frame.body);
@@ -71,7 +65,6 @@ class _MainChatState extends State<MainChat> {
 
   @override
   Widget build(BuildContext context) {
-
     userToken = ModalRoute.of(context)?.settings.arguments as UserToken;
     currentUser = userToken.user;
     var size = MediaQuery.of(context).size;
@@ -129,18 +122,16 @@ class _MainChatState extends State<MainChat> {
                   top: padding.vertical * 0.5, bottom: padding.vertical * 0.1),
               child: SizedBox(
                 width: size.width * 0.8,
-                child: Column(
-                  children: [
-                    TextField(
-                      onChanged: (value) {
-                        setState(() {
-                          if (friendListCurrentUser.isNotEmpty) {
-                            showFriendResults = true;
-                          } else {
-                            showFriendResults = false;
-                          }
-                        });
-                      },
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.push(context,
+                        PageTransition(
+                            child: SearchFriendPage(stompManager: widget.stompManager, user: currentUser,),
+                            type: PageTransitionType.bottomToTop)
+                    );
+                  },
+                  child: AbsorbPointer(
+                    child: TextField(
                       style: TextStyle(
                           fontSize: size.height * 0.02,
                           fontWeight: FontWeight.bold,
@@ -166,52 +157,7 @@ class _MainChatState extends State<MainChat> {
                               borderRadius: BorderRadius.circular(size.width),
                               borderSide: const BorderSide(color: lightGreen))),
                     ),
-                    Visibility(
-                      visible: showFriendResults,
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            ListView.builder(
-                              scrollDirection: Axis.vertical,
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: friendListCurrentUser.length,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  decoration: const BoxDecoration(
-                                      border: Border(
-                                          bottom:
-                                              BorderSide(color: lightGreen))),
-                                  child: ListTile(
-                                    title: Text(friendListCurrentUser[index]
-                                        .name
-                                        .toString()),
-                                    leading: FunctionService.createAvatar(
-                                        friendListCurrentUser[index]
-                                            .avatarUrl
-                                            .toString(),
-                                        size,
-                                        friendListCurrentUser[index]
-                                            .name
-                                            .toString(),
-                                        LISTCHAT
-                                    ),
-                                    trailing: IconButton(
-                                      onPressed: () {},
-                                      icon: const Icon(
-                                        Icons.person_add_outlined,
-                                        color: lightGreen,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  ],
+                  ),
                 ),
               ),
             ),
