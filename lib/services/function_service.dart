@@ -24,6 +24,10 @@ class FunctionService {
         radiusValue = size.width * 0.1;
         fontSizeValue = size.width * 0.1;
       }
+      case "USER-DETAIL": {
+        radiusValue = size.width * 0.08;
+        fontSizeValue = size.width * 0.08;
+      }
       default: {
         radiusValue = size.width * 0.1;
         fontSizeValue = size.width * 0.05;

@@ -9,5 +9,6 @@ import 'package:flutter/material.dart';
  const baseUserUrl = "http://10.0.2.2:8080";
  const socketUrl = 'ws://10.0.2.2:8080/websocket';
  const LISTCHAT = "LIST-CHAT";
+ const USERDETAIL = 'USER-DETAIL';
  const CHAT = "CHAT";
 const PROFILE = "PROFILE";

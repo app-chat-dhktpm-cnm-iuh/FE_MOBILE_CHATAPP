@@ -5,7 +5,7 @@ class User {
   String? phone;
   String? password;
   String? name;
-  String? dateOfBirth;
+  DateTime? dateOfBirth;
   bool? gender;
   bool? is_activated;
   String? avatarUrl;
@@ -29,7 +29,7 @@ class User {
           String? phone,
           String? password,
           String? name,
-          String? dateOfBirth,
+          DateTime? dateOfBirth,
           bool? gender,
           bool? is_activated,
           String? avatarUrl,
@@ -53,9 +53,9 @@ class User {
     password = json['password'];
     name = json['name'];
     if(json['date_of_birth'].runtimeType == String) {
-      dateOfBirth = DateTime.parse(json['date_of_birth']).toString();
+      dateOfBirth = DateTime.parse(json['date_of_birth']);
     } else if(json['date_of_birth'].runtimeType == int) {
-      dateOfBirth = DateTime.fromMillisecondsSinceEpoch(json['date_of_birth']).toString();
+      dateOfBirth = DateTime.fromMillisecondsSinceEpoch(json['date_of_birth']);
     } else {
       dateOfBirth = json['date_of_birth'];
     }

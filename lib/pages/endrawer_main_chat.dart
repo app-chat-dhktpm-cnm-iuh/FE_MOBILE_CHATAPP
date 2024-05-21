@@ -2,6 +2,7 @@ import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
 import 'package:fe_mobile_chat_app/pages/home.dart';
 import 'package:fe_mobile_chat_app/pages/main_chat.dart';
+import 'package:fe_mobile_chat_app/pages/user_detail_page.dart';
 import 'package:fe_mobile_chat_app/services/function_service.dart';
 import 'package:fe_mobile_chat_app/services/stomp_manager.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +50,11 @@ class _MyEndrawerState extends State<MyEndrawer> {
                   padding: EdgeInsets.only(
                       top: size.width * 0.05, bottom: size.width * 0.03),
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(context, PageTransition(
+                          child: UserDetailsPage(stompManager: widget.stompManager, user: currentUser),
+                          type: PageTransitionType.leftToRight));
+                    },
                     style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(darkGreen),
                         fixedSize: MaterialStateProperty.all(
