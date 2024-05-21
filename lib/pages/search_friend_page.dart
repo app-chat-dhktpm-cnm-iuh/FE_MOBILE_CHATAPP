@@ -46,23 +46,23 @@ class _SearchFriendPageState extends State<SearchFriendPage> {
           decoration: InputDecoration(
               prefixIcon: const Icon(
                 Icons.search,
-                color: greyDark,
+                color: Colors.black26,
               ),
-              contentPadding: EdgeInsets.all(size.height * 0.01),
+              contentPadding: EdgeInsets.all(size.height*0.005),
               fillColor: Colors.white,
               filled: true,
               hintText: "Tìm kiếm",
               hintStyle: TextStyle(
                   fontSize: size.height * 0.02,
                   fontWeight: FontWeight.normal,
-                  color: greyDark),
-              border: OutlineInputBorder(
-                borderSide: const BorderSide(color: lightGray),
+                  color: Colors.black26),
+              enabledBorder: OutlineInputBorder(
+                borderSide: const BorderSide(style: BorderStyle.none ),
                 borderRadius: BorderRadius.circular(size.width),
               ),
               focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(size.width),
-                  borderSide: const BorderSide(color: lightGreen))),
+                  borderSide: BorderSide(color: lightGreen, width: size.width*0.0035))),
         ),
         backgroundColor: lightGreen,
         leadingWidth: size.width*0.07,

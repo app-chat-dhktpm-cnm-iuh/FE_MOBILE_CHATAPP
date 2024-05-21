@@ -8,6 +8,7 @@ import 'package:fe_mobile_chat_app/model/Message.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
 import 'package:fe_mobile_chat_app/model/UserToken.dart';
 import 'package:fe_mobile_chat_app/pages/chat_list_widget.dart';
+import 'package:fe_mobile_chat_app/pages/create_group_chat_page.dart';
 import 'package:fe_mobile_chat_app/pages/endrawer_main_chat.dart';
 import 'package:fe_mobile_chat_app/pages/friend_list_widget.dart';
 import 'package:fe_mobile_chat_app/pages/search_friend_page.dart';
@@ -18,6 +19,7 @@ import 'package:fe_mobile_chat_app/services/serviceImpls/message_serviceImpl.dar
 import 'package:fe_mobile_chat_app/services/stomp_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -78,13 +80,41 @@ class _MainChatState extends State<MainChat> {
         automaticallyImplyLeading: false,
         title: SvgPicture.asset("assets/images/Smilechat-logo.svg"),
         actions: [
-          IconButton(
-              onPressed: () {},
-              icon: Icon(
-                Icons.add,
-                color: darkGreen,
-                size: size.height * 0.03,
-              ))
+          PopupMenuButton(
+            icon: Icon(Icons.add, color: lightGreen, size: size.width*0.08,),
+            color: lightGreen,
+            itemBuilder: (context)  => [
+              PopupMenuItem(
+                  child: Row(
+                    children: [
+                      Expanded(
+                          child: Icon(Icons.person_add_alt_1_rounded, color: Colors.white, size: size.width*0.065)
+                      ),
+                      Expanded(
+                          flex: 2,
+                          child: Text("Thêm bạn", style: TextStyle(fontSize: size.width*0.04, color: Colors.white))
+                      ),
+                    ],
+                  ),
+              ),
+              PopupMenuItem(
+                  onTap: () {
+                    Navigator.push(context, PageTransition(child: CreateGroupChatPage(stompManager: widget.stompManager, userToken: userToken,), type: PageTransitionType.fade));
+                  },
+                  child: Row(
+                    children: [
+                      Expanded(
+                          child: Icon(CupertinoIcons.chat_bubble_2_fill, color: Colors.white, size: size.width*0.065)
+                      ),
+                      Expanded(
+                          flex: 2,
+                          child: Text("Tạo nhóm", style: TextStyle(fontSize: size.width*0.04, color: Colors.white))
+                      ),
+                    ],
+                  )
+              )
+            ],
+          )
         ],
       ),
       bottomNavigationBar: Container(
@@ -139,7 +169,7 @@ class _MainChatState extends State<MainChat> {
                       decoration: InputDecoration(
                           prefixIcon: const Icon(
                             Icons.search,
-                            color: greyDark,
+                            color: Colors.black26,
                           ),
                           contentPadding: EdgeInsets.all(size.height * 0.01),
                           fillColor: Colors.white,
@@ -148,14 +178,12 @@ class _MainChatState extends State<MainChat> {
                           hintStyle: TextStyle(
                               fontSize: size.height * 0.02,
                               fontWeight: FontWeight.normal,
-                              color: greyDark),
-                          border: OutlineInputBorder(
-                            borderSide: const BorderSide(color: lightGray),
-                            borderRadius: BorderRadius.circular(size.width),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(size.width),
-                              borderSide: const BorderSide(color: lightGreen))),
+                              color: Colors.black26),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black12, width: size.width*0.0035),
+                          borderRadius: BorderRadius.circular(size.width),
+                        )
+                      ),
                     ),
                   ),
                 ),

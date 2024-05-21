@@ -56,9 +56,9 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
                   top: size.height*0.05,
                   child: IconButton(
                       onPressed: () {
-
+                        Navigator.pop(context);
                       },
-                      icon: Icon(Icons.arrow_back_rounded, color: lightGreen,size: size.width*0.06,)
+                      icon: Icon(Icons.arrow_back_rounded, color: darkGreen,size: size.width*0.06,)
                   ),
                 ),
                 Positioned(
@@ -168,7 +168,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
                     },
                     style: ButtonStyle(
                         alignment: Alignment.center,
-                        backgroundColor: MaterialStateProperty.all(lightGreen),
+                        backgroundColor: MaterialStateProperty.all(darkGreen),
                         fixedSize: MaterialStateProperty.all(
                           Size(size.width, size.height*0.05)
                         )

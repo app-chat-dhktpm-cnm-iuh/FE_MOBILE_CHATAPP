@@ -95,7 +95,7 @@ class _UpdateUserDetailsPageState extends State<UpdateUserDetailsPage> {
                           left: size.width*0.12,
                           child: IconButton(
                               onPressed: () { },
-                              icon: const Icon(Icons.photo_camera_rounded, color: lightGreen,),
+                              icon: const Icon(Icons.photo_camera_rounded, color: darkGreen,),
                               style: IconButton.styleFrom(
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(size.width*0.06),
@@ -125,7 +125,7 @@ class _UpdateUserDetailsPageState extends State<UpdateUserDetailsPage> {
                                 focusedBorder: UnderlineInputBorder(
                                     borderSide: BorderSide(color: darkGreen)
                                 ),
-                              suffixIcon: Icon(Icons.person, color: lightGreen,)
+                              suffixIcon: Icon(Icons.person, color: darkGreen,)
                             ),
                           ),
                         ),
@@ -148,7 +148,7 @@ class _UpdateUserDetailsPageState extends State<UpdateUserDetailsPage> {
                                   focusedBorder: UnderlineInputBorder(
                                       borderSide: BorderSide(color: darkGreen)
                                   ),
-                                  suffixIcon: Icon(Icons.cake, color: lightGreen,)
+                                  suffixIcon: Icon(Icons.cake, color: darkGreen,)
                                 ),
                               ),
                             ),
@@ -160,7 +160,7 @@ class _UpdateUserDetailsPageState extends State<UpdateUserDetailsPage> {
                               child: Row(
                                 children: [
                                   Radio(
-                                      activeColor: lightGreen,
+                                      activeColor: darkGreen,
                                       value: true,
                                       groupValue: _selectedOption,
                                       onChanged: (value) {
@@ -175,7 +175,7 @@ class _UpdateUserDetailsPageState extends State<UpdateUserDetailsPage> {
                               child: Row(
                                 children: [
                                   Radio(
-                                      activeColor: lightGreen,
+                                      activeColor: darkGreen,
                                       value: false,
                                       groupValue: _selectedOption,
                                       onChanged: (value) {
@@ -194,14 +194,14 @@ class _UpdateUserDetailsPageState extends State<UpdateUserDetailsPage> {
             ),
             ElevatedButton(
                 onPressed: () {},
-                child: Text("LƯU", style: TextStyle(fontSize: size.width*0.04, color: Colors.white),),
                 style: ButtonStyle(
                   alignment: Alignment.center,
-                  backgroundColor: MaterialStateProperty.all(lightGreen),
+                  backgroundColor: MaterialStateProperty.all(darkGreen),
                   fixedSize: MaterialStateProperty.all(
                       Size(size.width, size.height*0.05)
                   )
               ),
+                child: Text("LƯU", style: TextStyle(fontSize: size.width*0.04, color: Colors.white),),
 
             ),
           ],
