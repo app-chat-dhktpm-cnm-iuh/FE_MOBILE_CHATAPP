@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:fe_mobile_chat_app/model/User.dart';
 import 'package:fe_mobile_chat_app/pages/main_chat.dart';
@@ -7,7 +8,7 @@ import 'package:fe_mobile_chat_app/services/serviceImpls/friend_serviceImpl.dart
 import 'package:flutter/material.dart';
 
 class FunctionService {
-  static CircleAvatar createAvatar(String? imgUrl, Size size, String userName, String TYPE) {
+  static CircleAvatar createAvatar(dynamic imgUrl, Size size, String userName, String TYPE) {
     Color randomColor = getRamdomColor();
     var radiusValue;
     var fontSizeValue;
@@ -46,10 +47,17 @@ class FunctionService {
         ),
       );
     } else {
-      return CircleAvatar(
-        radius: radiusValue,
-        backgroundImage: NetworkImage(imgUrl),
-      );
+      if(imgUrl.runtimeType == String) {
+        return CircleAvatar(
+          radius: radiusValue,
+          backgroundImage: NetworkImage(imgUrl),
+        );
+      } else {
+        return CircleAvatar(
+          radius: radiusValue,
+          backgroundImage: MemoryImage(imgUrl),
+        );
+      }
     }
   }
 

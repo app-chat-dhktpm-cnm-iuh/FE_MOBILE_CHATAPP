@@ -58,7 +58,7 @@ class _MainChatState extends State<MainChat> {
       if (index == 2) {
         _scaffoldKey.currentState?.openEndDrawer();
       } else if (index == 1) {
-        _tabBodies = FriendsListWidget(currentUser: currentUser!);
+        _tabBodies = FriendsListWidget(currentUser: currentUser);
       } else if (index == 0) {
         _tabBodies = ChatsListWidget(currentUser: currentUser, stompManager: widget.stompManager,);
       }
@@ -68,6 +68,7 @@ class _MainChatState extends State<MainChat> {
   @override
   Widget build(BuildContext context) {
     userToken = ModalRoute.of(context)?.settings.arguments as UserToken;
+
     currentUser = userToken.user;
     var size = MediaQuery.of(context).size;
     var padding = MediaQuery.of(context).padding;
@@ -143,7 +144,7 @@ class _MainChatState extends State<MainChat> {
           ],
         ),
       ),
-      endDrawer: MyEndrawer(currentUser: currentUser, stompManager: widget.stompManager,),
+      endDrawer: MyEndrawer(userToken: userToken, stompManager: widget.stompManager,),
       body: Center(
         child: Column(
           children: [

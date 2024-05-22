@@ -20,7 +20,14 @@ class DeleteConversationUser {
 
   DeleteConversationUser.fromJson(Map<String, dynamic> json) {
     user_phone = json['user_phone'];
-    deleted_at = json['deleted_at'];
+
+    if(json['deleted_at'].runtimeType == String) {
+      deleted_at = DateTime.parse(json['deleted_at']);
+    } else if(json['deleted_at'].runtimeType == int) {
+      deleted_at = DateTime.fromMillisecondsSinceEpoch(json['deleted_at']);
+    } else {
+      deleted_at = json['date_of_birth'];
+    }
   }
 
   Map<String, dynamic> toJson() {

@@ -10,11 +10,27 @@ class UserServiceImpl {
     User userDetail = User();
     dynamic user;
     String body = "";
-    await UserServices.getUserDetailsByphone(phone!).then((value) => {
+    await UserServices.getUserDetailsByPhone(phone!).then((value) => {
       body = utf8.decode(value.bodyBytes),
       user = jsonDecode(body),
       userDetail = User.fromJson(user),
     });
+    return userDetail;
+  }
+
+  static Future<User> updateUserDetail(
+      User user) async {
+    User userDetail = User();
+    String body = "";
+    dynamic userDetailDynamic;
+
+      await UserServices.updateUserDetail(user).then((value) => {
+        body = utf8.decode(value.bodyBytes),
+        userDetailDynamic = jsonDecode(body),
+        userDetail = User.fromJson(userDetailDynamic),
+      });
+
+
     return userDetail;
   }
 }

@@ -61,7 +61,7 @@ class _LoginState extends State<Login> {
                 child: Text(
                   "Đăng nhập",
                   style: TextStyle(
-                      fontSize: size.height * 0.04,
+                      fontSize: size.width * 0.08,
                       fontWeight: FontWeight.bold,
                       color: lightGreen),
                 ),
@@ -81,7 +81,7 @@ class _LoginState extends State<Login> {
                     textInputAction: TextInputAction.next,
                     style: TextStyle(
                         color: darkGreen,
-                        fontSize: size.height * 0.03,
+                        fontSize: size.width * 0.05,
                         fontWeight: FontWeight.w400),
                     decoration: const InputDecoration(
                         isDense: true,
@@ -102,7 +102,7 @@ class _LoginState extends State<Login> {
                       controller: _controllerPass,
                       style: TextStyle(
                           color: darkGreen,
-                          fontSize: size.height * 0.03,
+                          fontSize: size.width * 0.05,
                           fontWeight: FontWeight.w400),
                       obscureText: true,
                       decoration: const InputDecoration(
@@ -124,7 +124,7 @@ class _LoginState extends State<Login> {
                     child: InkWell(
                       child: Text("Quên mật khẩu ?",
                           style: TextStyle(
-                              fontSize: size.height * 0.024,
+                              fontSize: size.width * 0.045,
                               fontWeight: FontWeight.bold,
                               color: lightGreen)),
                       onTap: () {},
@@ -174,7 +174,7 @@ class _LoginState extends State<Login> {
                           Size(size.width * 0.7, size.height * 0.065))),
                   child: Text("Đăng nhập",
                       style: TextStyle(
-                          color: Colors.white, fontSize: size.height * 0.03)))
+                          color: Colors.white, fontSize: size.width * 0.05)))
             ],
           ),
         ));

@@ -59,6 +59,7 @@ class User {
     } else {
       dateOfBirth = json['date_of_birth'];
     }
+
     gender = json['gender'];
     is_activated = json['_activated'];
     avatarUrl = json['avatar_url'];
@@ -77,7 +78,11 @@ class User {
     data['phone'] = phone;
     data['password'] = password;
     data['name'] = name;
-    data['date_of_birth'] = dateOfBirth;
+    if(dateOfBirth != null) {
+      data['date_of_birth'] = dateOfBirth?.toIso8601String();
+    } else {
+      data['date_of_birth'] = dateOfBirth;
+    }
     data['gender'] = gender;
     data['_activated'] = is_activated;
     data['avatar_url'] = avatarUrl;

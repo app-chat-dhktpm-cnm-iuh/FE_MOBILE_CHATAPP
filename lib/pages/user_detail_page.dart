@@ -1,5 +1,10 @@
+import 'dart:convert';
+
 import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
+import 'package:fe_mobile_chat_app/model/UserToken.dart';
+import 'package:fe_mobile_chat_app/pages/endrawer_main_chat.dart';
+import 'package:fe_mobile_chat_app/pages/main_chat.dart';
 import 'package:fe_mobile_chat_app/pages/update_user_details_page.dart';
 import 'package:fe_mobile_chat_app/services/function_service.dart';
 import 'package:fe_mobile_chat_app/services/stomp_manager.dart';
@@ -9,9 +14,9 @@ import 'package:flutter/widgets.dart';
 import 'package:page_transition/page_transition.dart';
 
 class UserDetailsPage extends StatefulWidget {
-  final User user;
+  final UserToken userToken;
   final StompManager stompManager;
-  const UserDetailsPage({super.key, required this.user, required this.stompManager});
+  const UserDetailsPage({super.key, required this.userToken, required this.stompManager});
 
   @override
   State<UserDetailsPage> createState() => _UserDetailsPageState();
@@ -19,11 +24,13 @@ class UserDetailsPage extends StatefulWidget {
 
 class _UserDetailsPageState extends State<UserDetailsPage> {
   User currentUser = User();
+  UserToken userWithToken = UserToken();
   StompManager stompManager = StompManager();
   @override
   void initState() {
     super.initState();
-    currentUser = widget.user;
+    userWithToken = widget.userToken;
+    currentUser = userWithToken.user!;
     stompManager = widget.stompManager;
   }
 
@@ -35,6 +42,15 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
+
+    String dateOfBirth = "";
+
+    if(currentUser.dateOfBirth.toString() == 'null' || currentUser.dateOfBirth.toString() == '') {
+      dateOfBirth = '20/10/2000';
+    } else {
+      dateOfBirth = '${currentUser.dateOfBirth?.day}/${currentUser.dateOfBirth?.month}/${currentUser.dateOfBirth?.year}';
+    }
+
     String gender = currentUser.gender == true ? "Nam" : "Nữ";
     return Scaffold(
       body: Column(
@@ -56,7 +72,11 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
                   top: size.height*0.05,
                   child: IconButton(
                       onPressed: () {
-                        Navigator.pop(context);
+                        Navigator.push(context, PageTransition(
+                            child: MainChat(stompManager: stompManager,),
+                            type:PageTransitionType.fade,
+                            settings: RouteSettings(arguments: userWithToken)
+                        ));
                       },
                       icon: Icon(Icons.arrow_back_rounded, color: darkGreen,size: size.width*0.06,)
                   ),
@@ -136,7 +156,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
                         ),
                         Expanded(
                             flex: 2,
-                            child: Text(currentUser.dateOfBirth.toString(), style: TextStyle(
+                            child: Text(dateOfBirth, style: TextStyle(
                               fontSize: size.width*0.04
                             ),)
                         )
@@ -164,7 +184,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
                 ),
                 ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.push(context, PageTransition(child: UpdateUserDetailsPage(stompManager: stompManager, user: currentUser, ), type: PageTransitionType.bottomToTop));
+                      Navigator.push(context, PageTransition(child: UpdateUserDetailsPage(stompManager: stompManager, userToken: userWithToken, ), type: PageTransitionType.bottomToTop));
                     },
                     style: ButtonStyle(
                         alignment: Alignment.center,

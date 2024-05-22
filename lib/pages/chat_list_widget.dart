@@ -100,13 +100,17 @@ class _ChatsListWidgetState extends State<ChatsListWidget> {
                 Message lastMessage = MessageServiceImpl.getLastMessage(
                     conversation?.messages!.toList());
 
-                conversationName = ConversationServiceImpl.getNameConversation(
-                    conversationResponse, phone_current);
+                if(conversation!.members!.length > 2) {
+                  conversationName = conversation.title;
+                } else {
+                  conversationName = ConversationServiceImpl.getNameConversation(
+                      conversationResponse, phone_current);
+                }
 
-                late String? conversationAvatar = conversation!.ava_conversation_url.toString();
+                late String? conversationAvatar;
 
-                if(conversation!.members!.length > 2){
-                  conversationAvatar = conversation.ava_conversation_url.toString();
+                if(conversation.members!.length > 2){
+                  conversationAvatar = conversation.ava_conversation_url;
                 } else {
                   conversationResponse.memberDetails?.forEach((member) {
                     if(member.phone != currentUser.phone) {
@@ -117,22 +121,24 @@ class _ChatsListWidgetState extends State<ChatsListWidget> {
 
                 String subtitle;
                 if(lastMessage.images!.isNotEmpty) {
-                  if(lastMessage.sender_phone != currentUser.phone) {
+                  if(lastMessage.sender_phone != currentUser.phone && lastMessage.sender_phone != null) {
                     subtitle = "${lastMessage.sender_name}: [Đã gửi ${lastMessage.images!.length} hình ảnh]";
                   } else {
                     subtitle = "Bạn: [Đã gửi ${lastMessage.images!.length} hình ảnh]";
                   }
                 } else if(lastMessage.attaches!.isNotEmpty) {
-                  if(lastMessage.sender_phone != currentUser.phone) {
+                  if(lastMessage.sender_phone != currentUser.phone && lastMessage.sender_phone != null) {
                     subtitle = "${lastMessage.sender_name}: [Đã gửi ${lastMessage.attaches!.length} tập tin]";
                   } else {
                     subtitle = "Bạn: [Đã gửi ${lastMessage.attaches!.length} tập tin]";
                   }
                 } else {
-                  if(lastMessage.sender_phone != currentUser.phone) {
+                  if(lastMessage.sender_phone != currentUser.phone && lastMessage.sender_phone != null) {
                     subtitle = "${lastMessage.sender_name}: ${lastMessage.content}";
-                  } else {
+                  } else if (lastMessage.sender_phone == currentUser.phone && lastMessage.sender_phone != null){
                     subtitle = "Bạn: ${lastMessage.content}";
+                  } else {
+                    subtitle = "${lastMessage.content}";
                   }
                 }
 

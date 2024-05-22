@@ -33,11 +33,11 @@ class ConversationServiceImpl {
     if (memberDetails!.length > 2) {
       return conversation?.title;
     } else {
-      memberDetails.forEach((member) {
+      for (var member in memberDetails) {
         if (member.phone != current_phone) {
           conversationName = member.name;
         }
-      });
+      }
       return conversationName;
     }
   }
