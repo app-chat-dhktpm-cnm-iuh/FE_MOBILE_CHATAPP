@@ -26,6 +26,8 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
   User currentUser = User();
   UserToken userWithToken = UserToken();
   StompManager stompManager = StompManager();
+  dynamic updateUser;
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +54,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
     }
 
     String gender = currentUser.gender == true ? "Nam" : "Nữ";
+
     return Scaffold(
       body: Column(
         children: [

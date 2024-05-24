@@ -39,18 +39,7 @@ class UserServices {
   }
 
   static Future<http.Response> updateUserDetail(User user) async {
-    print(user);
     final uri = Uri.parse("$baseUserUrl/user/details-update" );
-    print(jsonEncode(user));
-
-    // final jsonEncoder =   JsonEncoder.withIndent(' ', (object) {
-    //   if(object is DateTime?) {
-    //     return object?.toIso8601String();
-    //   }
-    //   return null;
-    // },);
-    //
-    // final jsonString = jsonEncoder.convert(user);
 
     final response = await http.post(
           uri,

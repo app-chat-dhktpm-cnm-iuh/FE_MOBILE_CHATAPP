@@ -64,12 +64,14 @@ class _ChatsListWidgetState extends State<ChatsListWidget> {
         _conversationListResponse = _conversationListResponse;
       }
     });
-    ConversationServiceImpl.getConversationOfCurrentUser(phone_current)
-        .then((conversationResponse) => {
-              setState(() {
-                _conversationListResponse = conversationResponse;
-              })
-            });
+    if(_conversationListResponse.isEmpty) {
+      ConversationServiceImpl.getConversationOfCurrentUser(phone_current)
+          .then((conversationResponse) => {
+        setState(() {
+          _conversationListResponse = conversationResponse;
+        })
+      });
+    }
   }
 
   void sortListConversation() {
@@ -80,7 +82,6 @@ class _ChatsListWidgetState extends State<ChatsListWidget> {
 
   @override
   Widget build(BuildContext context) {
-    setState(() {});
     String? conversationName = "";
     final size = MediaQuery.of(context).size;
     return Expanded(

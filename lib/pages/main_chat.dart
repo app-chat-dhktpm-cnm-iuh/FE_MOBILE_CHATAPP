@@ -36,7 +36,6 @@ class MainChat extends StatefulWidget {
 late var _listUserOnline;
 User currentUser = User();
 var userToken;
-List<User> friendListCurrentUser = [];
 bool showFriendResults = false;
 
 class _MainChatState extends State<MainChat> {
@@ -48,7 +47,7 @@ class _MainChatState extends State<MainChat> {
   void initState() {
     super.initState();
     widget.stompManager.subscribeToDestination("/topic/public", (frame) {
-      print("subscribe main chat");
+      print("subscribe topic public");
       print(frame.body);
     },);
   }
@@ -100,7 +99,7 @@ class _MainChatState extends State<MainChat> {
               ),
               PopupMenuItem(
                   onTap: () {
-                    Navigator.push(context, PageTransition(child: CreateGroupChatPage(stompManager: widget.stompManager, userToken: userToken,), type: PageTransitionType.fade));
+                    Navigator.push(context, PageTransition(child: CreateGroupChatPage(stompManager: widget.stompManager, userToken: userToken), type: PageTransitionType.fade));
                   },
                   child: Row(
                     children: [

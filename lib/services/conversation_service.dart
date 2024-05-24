@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:fe_mobile_chat_app/constants.dart';
+import 'package:fe_mobile_chat_app/model/Conversation.dart';
 import 'package:http/http.dart' as http;
 
 import '../model/ConversationResponse.dart';
@@ -17,5 +18,4 @@ class ConversationService {
     print(conversationResponseList);
     return conversationResponseList;
   }
-
 }

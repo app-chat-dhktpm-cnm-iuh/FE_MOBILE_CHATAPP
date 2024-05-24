@@ -118,13 +118,13 @@ class _RegPhoneNumberState extends State<RegPhoneNumber> {
                         activeColor: darkGreen,
                         onChanged: (newValue) {
                           setState(() {
-                            this.checkedValue = newValue;
+                            checkedValue = newValue;
                             if (newValue! && validPhone) {
                               _errorPhone = null;
                             }
                           });
                         },
-                        value: this.checkedValue,
+                        value: checkedValue,
                       ),
                       Text("Tôi đồng ý với các điều khoản sử dụng",
                           style: TextStyle(
