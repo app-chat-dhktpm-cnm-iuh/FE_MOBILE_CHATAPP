@@ -70,6 +70,10 @@ class _ChatsListWidgetState extends State<ChatsListWidget> {
         setState(() {
           _conversationListResponse = conversationResponse;
         })
+      }).catchError((e) {
+        setState(() {
+          _conversationListResponse = [];
+        });
       });
     }
   }

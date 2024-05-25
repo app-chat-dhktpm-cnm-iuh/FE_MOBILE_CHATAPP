@@ -4,10 +4,12 @@ import 'dart:io';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/model/Friend.dart';
+import 'package:fe_mobile_chat_app/model/FriendRequest.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
 import 'package:fe_mobile_chat_app/model/UserToken.dart';
 import 'package:fe_mobile_chat_app/pages/user_detail_page.dart';
 import 'package:fe_mobile_chat_app/services/function_service.dart';
+import 'package:fe_mobile_chat_app/services/serviceImpls/friend_serviceImpl.dart';
 import 'package:fe_mobile_chat_app/services/serviceImpls/user_serviceImpl.dart';
 import 'package:fe_mobile_chat_app/services/stomp_manager.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -22,8 +24,15 @@ import 'package:page_transition/page_transition.dart';
 class UpdateUserDetailsPage extends StatefulWidget {
   final StompManager stompManager;
   final UserToken userToken;
+  final List<User> friends;
+  final List<FriendRequest> friendRequets;
   const UpdateUserDetailsPage(
-      {super.key, required this.stompManager, required this.userToken});
+      {super.key,
+        required this.stompManager,
+        required this.userToken,
+        required this.friends,
+        required this.friendRequets
+      });
 
   @override
   State<UpdateUserDetailsPage> createState() => _UpdateUserDetailsPageState();
@@ -33,6 +42,8 @@ class _UpdateUserDetailsPageState extends State<UpdateUserDetailsPage> {
   StompManager stompManager = StompManager();
   User currentUser = User();
   UserToken userWithToken = UserToken();
+  List<FriendRequest> friendRequests = [];
+  List<User> friendListCurrentUser = [];
   bool _selectedOption = false;
   String? _errorName;
   String? _errorBirthDay;
@@ -80,6 +91,9 @@ class _UpdateUserDetailsPageState extends State<UpdateUserDetailsPage> {
     stompManager = widget.stompManager;
     currentUser = widget.userToken.user!;
     _selectedOption = currentUser.gender!;
+    friendRequests = widget.friendRequets;
+    friendListCurrentUser = widget.friends;
+
     controllerUserName = TextEditingController(
         text: currentUser.name
     );
@@ -319,7 +333,7 @@ class _UpdateUserDetailsPageState extends State<UpdateUserDetailsPage> {
                     });
 
                     userWithToken = userWithToken.copyWith(user: user, token: widget.userToken.token);
-                    Navigator.push(context, PageTransition(child: UserDetailsPage(stompManager: stompManager, userToken: userWithToken,), type: PageTransitionType.topToBottom));
+                    Navigator.push(context, PageTransition(child: UserDetailsPage(stompManager: stompManager, userToken: userWithToken, friendRequests: friendRequests, friends: friendListCurrentUser,), type: PageTransitionType.topToBottom));
                   }
                 },
                 style: ButtonStyle(

@@ -1,21 +1,52 @@
 import 'package:fe_mobile_chat_app/constants.dart';
+import 'package:fe_mobile_chat_app/model/FriendRequest.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
+import 'package:fe_mobile_chat_app/model/UserToken.dart';
 import 'package:fe_mobile_chat_app/pages/friend_tab.dart';
 import 'package:fe_mobile_chat_app/pages/group_tab.dart';
+import 'package:fe_mobile_chat_app/services/stomp_manager.dart';
 import 'package:flutter/material.dart';
 
 class FriendsListWidget extends StatefulWidget {
-  User currentUser;
+  final UserToken userToken;
+  final List<FriendRequest> friendRequests;
+  final List<User> friends;
+  final StompManager stompManager;
   FriendsListWidget({
     super.key,
-    required this.currentUser
+    required this.userToken,
+    required this.friendRequests,
+    required this.friends,
+    required this.stompManager
   });
 
   @override
   State<FriendsListWidget> createState() => _FriendsListWidgetState();
 }
 
+
+
 class _FriendsListWidgetState extends State<FriendsListWidget> {
+  UserToken userWithToken = UserToken();
+  List<FriendRequest> friendRequestList = [];
+  List<User> friendLists = [];
+  StompManager stompManager = StompManager();
+
+  @override
+  void initState() {
+      super.initState();
+      userWithToken = widget.userToken;
+      friendRequestList = widget.friendRequests;
+      friendLists = widget.friends;
+      stompManager = widget.stompManager;
+      print(friendLists);
+  }
+
+  @override
+  void dispose() {
+      super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -51,7 +82,14 @@ class _FriendsListWidgetState extends State<FriendsListWidget> {
             ),
             Expanded(
                 child: TabBarView(
-                  children: [FriendsTab(currentUser: widget.currentUser), GroupTab(currentUser: widget.currentUser)],
+                children: [
+                  FriendsTab(
+                    friends: friendLists,
+                    userToken: userWithToken,
+                    friendRequests: friendRequestList,
+                    stompManager: stompManager,
+                  ),
+                  GroupTab(currentUser: userWithToken.user!)],
                 ))
           ],
         ),

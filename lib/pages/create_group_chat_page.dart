@@ -6,6 +6,7 @@ import 'package:fe_mobile_chat_app/constants.dart';
 import 'package:fe_mobile_chat_app/model/Conversation.dart';
 import 'package:fe_mobile_chat_app/model/DeleteConversationUser.dart';
 import 'package:fe_mobile_chat_app/model/Friend.dart';
+import 'package:fe_mobile_chat_app/model/FriendRequest.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
 import 'package:fe_mobile_chat_app/model/UserToken.dart';
 import 'package:fe_mobile_chat_app/pages/main_chat.dart';
@@ -42,6 +43,7 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
   List<bool> isCheckedInSearch = [];
   List<User> memberList = [];
   List<User> friendListSearch = [];
+  List<FriendRequest> friendRequests = [];
   bool showListMember = false;
   bool _isOpenPicker = false;
   bool showButtonPickImage = true;
@@ -67,6 +69,12 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
                 isChecked = List.generate(friendList.length, (_) => false);
               })
             });
+    FriendServiceImpl.getFriendRequestList(currentUser.phone)
+        .then((friendRequestLists) => {
+      setState(() {
+        friendRequests = friendRequestLists;
+      })
+    });
   }
 
   @override
@@ -112,10 +120,11 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
                               PageTransition(
                                   child: MainChat(
                                     stompManager: widget.stompManager,
+                                    userToken: userWithToken,
+                                    friendRequests: friendRequests,
+                                    friends: friendList,
                                   ),
-                                  type: PageTransitionType.fade,
-                                  settings:
-                                      RouteSettings(arguments: userWithToken)));
+                                  type: PageTransitionType.fade,));
                         },
                         child: Text(
                           "Thoát",
@@ -596,12 +605,9 @@ class _CreateGroupChatPageState extends State<CreateGroupChatPage> {
                                   print(conversationRequest);
                                   widget.stompManager.sendStompMessage("/app/user.createGroupChat", const JsonEncoder().convert(conversationRequest));
                                   Navigator.push(context, PageTransition(
-                                      child: MainChat(stompManager: widget.stompManager,),
+                                      child: MainChat(stompManager: widget.stompManager, userToken:  userWithToken, friendRequests: friendRequests, friends: friendList,),
                                       type: PageTransitionType.topToBottom,
-                                      settings: RouteSettings(
-                                        arguments: userWithToken
-                                      )),
-                                  );
+                                  ));
                                 },
                                 icon: Icon(Icons.arrow_forward, color: Colors.white, size: size.width*0.05,),
                                 style: ButtonStyle(

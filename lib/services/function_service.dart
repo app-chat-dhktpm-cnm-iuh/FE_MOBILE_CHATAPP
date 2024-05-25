@@ -29,6 +29,10 @@ class FunctionService {
         radiusValue = size.width * 0.08;
         fontSizeValue = size.width * 0.08;
       }
+      case "PERSONAL_WALL": {
+        radiusValue = size.width * 0.13;
+        fontSizeValue = size.width * 0.1;
+      }
       default: {
         radiusValue = size.width * 0.1;
         fontSizeValue = size.width * 0.05;

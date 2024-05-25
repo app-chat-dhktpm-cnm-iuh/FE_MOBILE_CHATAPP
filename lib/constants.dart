@@ -11,4 +11,5 @@ import 'package:flutter/material.dart';
  const LISTCHAT = "LIST-CHAT";
  const USERDETAIL = 'USER-DETAIL';
  const CHAT = "CHAT";
-const PROFILE = "PROFILE";
+ const PROFILE = "PROFILE";
+ const PERSONAL_WALL = "PERSONAL_WALL";

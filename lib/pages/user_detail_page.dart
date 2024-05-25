@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 import 'package:fe_mobile_chat_app/constants.dart';
+import 'package:fe_mobile_chat_app/model/FriendRequest.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
 import 'package:fe_mobile_chat_app/model/UserToken.dart';
 import 'package:fe_mobile_chat_app/pages/endrawer_main_chat.dart';
 import 'package:fe_mobile_chat_app/pages/main_chat.dart';
 import 'package:fe_mobile_chat_app/pages/update_user_details_page.dart';
 import 'package:fe_mobile_chat_app/services/function_service.dart';
+import 'package:fe_mobile_chat_app/services/serviceImpls/friend_serviceImpl.dart';
 import 'package:fe_mobile_chat_app/services/stomp_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +18,15 @@ import 'package:page_transition/page_transition.dart';
 class UserDetailsPage extends StatefulWidget {
   final UserToken userToken;
   final StompManager stompManager;
-  const UserDetailsPage({super.key, required this.userToken, required this.stompManager});
+  final List<FriendRequest> friendRequests;
+  final List<User> friends;
+  const UserDetailsPage({
+    super.key,
+    required this.userToken,
+    required this.stompManager,
+    required this.friendRequests,
+    required this.friends
+  });
 
   @override
   State<UserDetailsPage> createState() => _UserDetailsPageState();
@@ -26,6 +36,8 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
   User currentUser = User();
   UserToken userWithToken = UserToken();
   StompManager stompManager = StompManager();
+  List<FriendRequest> friendRequestList = [];
+  List<User> friendLists = [];
   dynamic updateUser;
 
   @override
@@ -34,6 +46,9 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
     userWithToken = widget.userToken;
     currentUser = userWithToken.user!;
     stompManager = widget.stompManager;
+
+    friendRequestList = widget.friendRequests;
+    friendLists = widget.friends;
   }
 
   @override
@@ -76,9 +91,8 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
                   child: IconButton(
                       onPressed: () {
                         Navigator.push(context, PageTransition(
-                            child: MainChat(stompManager: stompManager,),
-                            type:PageTransitionType.fade,
-                            settings: RouteSettings(arguments: userWithToken)
+                            child: MainChat(stompManager: stompManager, userToken: userWithToken, friendRequests: friendRequestList, friends: friendLists,),
+                            type:PageTransitionType.fade
                         ));
                       },
                       icon: Icon(Icons.arrow_back_rounded, color: darkGreen,size: size.width*0.06,)
@@ -187,7 +201,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
                 ),
                 ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.push(context, PageTransition(child: UpdateUserDetailsPage(stompManager: stompManager, userToken: userWithToken, ), type: PageTransitionType.bottomToTop));
+                      Navigator.push(context, PageTransition(child: UpdateUserDetailsPage(stompManager: stompManager, userToken: userWithToken, friendRequets: friendRequestList, friends: friendLists,), type: PageTransitionType.bottomToTop));
                     },
                     style: ButtonStyle(
                         alignment: Alignment.center,

@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:fe_mobile_chat_app/constants.dart';
+import 'package:fe_mobile_chat_app/model/FriendRequest.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
 import 'package:fe_mobile_chat_app/model/UserToken.dart';
 import 'package:fe_mobile_chat_app/pages/home.dart';
 import 'package:fe_mobile_chat_app/pages/main_chat.dart';
+import 'package:fe_mobile_chat_app/services/serviceImpls/friend_serviceImpl.dart';
 import 'package:fe_mobile_chat_app/services/stomp_manager.dart';
 import 'package:fe_mobile_chat_app/services/user_service.dart';
 import 'package:flutter/material.dart';
@@ -141,19 +143,39 @@ class _LoginState extends State<Login> {
                         phone: _controllerPhone.text,
                         password: _controllerPass.text,
                         role: "USER");
-                    await UserServices.login(user).then((value) => {
-                          responseBody = utf8.decode(value.bodyBytes),
-                          userWithToken = UserToken.fromJson(jsonDecode(responseBody)),
+                    await UserServices.login(user).then((value) async {
+                          responseBody = utf8.decode(value.bodyBytes);
+                          userWithToken = UserToken.fromJson(jsonDecode(responseBody));
                           if (value.statusCode == 202)
                             {
-                              widget.stompManager.sendStompMessage("/app/user.userOnline", JsonEncoder().convert(user.toJson())),
+                              widget.stompManager.sendStompMessage("/app/user.userOnline", JsonEncoder().convert(user.toJson()));
+                              List<User> friendList = [];
+                              List<FriendRequest> friendRequests = [];
+                              await FriendServiceImpl.getFriendListOfCurrentUser(userWithToken.user?.phone)
+                                  .then((friends) => {
+                              setState(() {
+                                friendList = friends;
+                              })
+                              });
+                              try {
+                                await FriendServiceImpl.getFriendRequestList(userWithToken.user?.phone)
+                                    .then((friendRequestLists) => {
+                                  setState(() {
+                                    friendRequests = friendRequestLists;
+                                  })}).catchError((e) {
+                                  friendRequests = [];
+                                  print(e);
+                                  return e;
+                                });
+                              } catch (e) {
+                                print(e);
+                              }
+
                               Navigator.push(
                                   context,
                                   PageTransition(
-                                      child: MainChat(stompManager: widget.stompManager,),
-                                      type: PageTransitionType.rightToLeft,
-                                      settings: RouteSettings(
-                                          arguments: userWithToken)))
+                                      child: MainChat(stompManager: widget.stompManager, userToken: userWithToken, friendRequests: friendRequests, friends: friendList,),
+                                      type: PageTransitionType.rightToLeft,));
                             }
                           else
                             {
@@ -164,7 +186,7 @@ class _LoginState extends State<Login> {
                                   style: TextStyle(color: Colors.white),
                                 ),
                                 backgroundColor: Colors.red,
-                              ))
+                              ));
                             }
                         });
                   },

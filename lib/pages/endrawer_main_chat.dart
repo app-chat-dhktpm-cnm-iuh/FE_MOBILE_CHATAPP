@@ -1,4 +1,5 @@
 import 'package:fe_mobile_chat_app/constants.dart';
+import 'package:fe_mobile_chat_app/model/FriendRequest.dart';
 import 'package:fe_mobile_chat_app/model/User.dart';
 import 'package:fe_mobile_chat_app/model/UserToken.dart';
 import 'package:fe_mobile_chat_app/pages/home.dart';
@@ -12,7 +13,15 @@ import 'package:page_transition/page_transition.dart';
 class MyEndrawer extends StatefulWidget {
   final UserToken userToken;
   final StompManager stompManager;
-  MyEndrawer({super.key, required this.userToken, required this.stompManager});
+  final List<FriendRequest> friendRequests;
+  final List<User> friends;
+  MyEndrawer({
+    super.key,
+    required this.userToken,
+    required this.stompManager,
+    required this.friendRequests,
+    required this.friends
+  });
 
   @override
   State<MyEndrawer> createState() => _MyEndrawerState();
@@ -23,6 +32,8 @@ class _MyEndrawerState extends State<MyEndrawer> {
   UserToken userWithToken = UserToken();
   late String avaUrl;
   late String name;
+  List<FriendRequest> friendRequestList = [];
+  List<User> friendList = [];
   @override
   void initState() {
     super.initState();
@@ -30,6 +41,8 @@ class _MyEndrawerState extends State<MyEndrawer> {
     currentUser = userWithToken.user!;
     avaUrl = currentUser.avatarUrl.toString();
     name = currentUser.name.toString();
+    friendList = widget.friends;
+    friendRequestList = widget.friendRequests;
   }
 
   @override
@@ -55,7 +68,7 @@ class _MyEndrawerState extends State<MyEndrawer> {
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.push(context, PageTransition(
-                          child: UserDetailsPage(stompManager: widget.stompManager, userToken: userWithToken),
+                          child: UserDetailsPage(stompManager: widget.stompManager, userToken: userWithToken, friendRequests: friendRequestList, friends: friendList,),
                           type: PageTransitionType.leftToRight));
                     },
                     style: ButtonStyle(
